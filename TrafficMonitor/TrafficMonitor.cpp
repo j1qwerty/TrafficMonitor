@@ -59,7 +59,8 @@ CTrafficMonitorApp::CTrafficMonitorApp()
 void CTrafficMonitorApp::LoadLanguageConfig()
 {
     CIniHelper ini{ m_config_path };
-    m_general_data.language.fromConfigString(ini.GetString(_T("general"), _T("language"), L""));
+    m_general_data.language.fromConfigString(
+        ini.GetString(_T("general"), _T("language"), L"en-US|English|"));
 }
 
 void CTrafficMonitorApp::LoadConfig()
@@ -99,11 +100,19 @@ void CTrafficMonitorApp::LoadConfig()
     m_cfg_data.m_show_more_info = ini.GetBool(_T("config"), _T("show_cpu_memory"), false);
     m_main_wnd_data.m_mouse_penetrate = ini.GetBool(_T("config"), _T("mouse_penetrate"), false);
     m_cfg_data.m_show_task_bar_wnd = ini.GetBool(_T("config"), _T("show_task_bar_wnd"), false);
+#ifdef TASKBAR_ONLY
+    m_cfg_data.m_hide_main_window = true;
+    m_cfg_data.m_show_task_bar_wnd = true;
+#endif
     m_cfg_data.m_position_x = ini.GetInt(_T("config"), _T("position_x"), -1);
     m_cfg_data.m_position_y = ini.GetInt(_T("config"), _T("position_y"), -1);
     m_cfg_data.m_auto_select = ini.GetBool(_T("connection"), _T("auto_select"), true);
     m_cfg_data.m_select_all = ini.GetBool(_T("connection"), _T("select_all"), false);
     m_cfg_data.m_hide_main_window = ini.GetBool(_T("config"), _T("hide_main_window"), false);
+#ifdef TASKBAR_ONLY
+    m_cfg_data.m_hide_main_window = true;
+    m_cfg_data.m_show_task_bar_wnd = true;
+#endif
     m_cfg_data.m_connection_name = CCommon::UnicodeToStr(ini.GetString(L"connection", L"connection_name", L"").c_str());
     m_cfg_data.m_skin_name = ini.GetString(_T("config"), _T("skin_selected"), _T(""));
     if (m_cfg_data.m_skin_name.substr(0, 8) == L".\\skins\\")       //如果读取到的皮肤名称前面有".\\skins\\"，则把它删除。（用于和前一个版本保持兼容性）
@@ -1014,9 +1023,10 @@ BOOL CTrafficMonitorApp::InitInstance()
         }
     }
 
-    //初始化GDI+
+#ifndef TASKBAR_ONLY
     Gdiplus::GdiplusStartupInput gdiplusStartupInput;
     GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
+#endif
 
     //初始时使用屏幕DPI
     DPIFromWindow(nullptr);
@@ -1047,12 +1057,12 @@ BOOL CTrafficMonitorApp::InitInstance()
 
     AfxEnableControlContainer();
 
-    // 创建 shell 管理器，以防对话框包含
-    // 任何 shell 树视图控件或 shell 列表视图控件。
+#ifndef TASKBAR_ONLY
     CShellManager* pShellManager = new CShellManager;
-
-    // 激活“Windows Native”视觉管理器，以便在 MFC 控件中启用主题
     CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerWindows));
+#else
+    CShellManager* pShellManager = nullptr;
+#endif
 
     // 标准初始化
     // 如果未使用这些功能并希望减小
@@ -1101,38 +1111,41 @@ BOOL CTrafficMonitorApp::InitInstance()
 
     SendSettingsToPlugin();
 
+#ifdef TASKBAR_ONLY
+    m_taskbar_only_controller = new CTrafficMonitorDlg();
+    m_pMainWnd = m_taskbar_only_controller;
+    if (!m_taskbar_only_controller->Create(IDD_TRAFFICMONITOR_DIALOG, nullptr))
+    {
+        delete m_taskbar_only_controller;
+        m_taskbar_only_controller = nullptr;
+        m_pMainWnd = nullptr;
+        return FALSE;
+    }
+    m_taskbar_only_controller->ShowWindow(SW_HIDE);
+#else
     CTrafficMonitorDlg dlg;
     m_pMainWnd = &dlg;
     INT_PTR nResponse = dlg.DoModal();
-    if (nResponse == IDOK)
+    if (nResponse == -1)
     {
-        // TODO: 在此放置处理何时用
-        //  “确定”来关闭对话框的代码
-    }
-    else if (nResponse == IDCANCEL)
-    {
-        // TODO: 在此放置处理何时用
-        //  “取消”来关闭对话框的代码
-    }
-    else if (nResponse == -1)
-    {
-        TRACE(traceAppMsg, 0, "警告: 对话框创建失败，应用程序将意外终止。\n");
-        TRACE(traceAppMsg, 0, "警告: 如果您在对话框上使用 MFC 控件，则无法 #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS。\n");
+        TRACE(traceAppMsg, 0, "Dialog creation failed; the application will terminate.\n");
     }
 
-    // 删除上面创建的 shell 管理器。
     if (pShellManager != NULL)
     {
         delete pShellManager;
     }
+#endif
 
 #ifndef _AFXDLL
     ControlBarCleanUp();
 #endif
 
-    // 由于对话框已关闭，所以将返回 FALSE 以便退出应用程序，
-    //  而不是启动应用程序的消息泵。
+#ifdef TASKBAR_ONLY
+    return TRUE;
+#else
     return FALSE;
+#endif
 }
 
 void CTrafficMonitorApp::InitOpenHardwareLibInThread()
@@ -1386,8 +1399,17 @@ void CTrafficMonitorApp::OnUpdateLog()
 
 int CTrafficMonitorApp::ExitInstance()
 {
-    // 释放GDI+
+#ifdef TASKBAR_ONLY
+    if (m_taskbar_only_controller != nullptr)
+    {
+        if (m_taskbar_only_controller->GetSafeHwnd() != nullptr)
+            m_taskbar_only_controller->DestroyWindow();
+        delete m_taskbar_only_controller;
+        m_taskbar_only_controller = nullptr;
+    }
+#else
     Gdiplus::GdiplusShutdown(m_gdiplusToken);
+#endif
 
     return CWinApp::ExitInstance();
 }

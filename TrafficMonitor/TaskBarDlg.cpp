@@ -1127,10 +1127,18 @@ void CTaskBarDlg::OnInitMenu(CMenu* pMenu)
     CDialogEx::OnInitMenu(pMenu);
 
     // TODO: 在此处添加消息处理程序代码
+#ifdef TASKBAR_ONLY
+    pMenu->DeleteMenu(ID_SHOW_MAIN_WND, MF_BYCOMMAND);
+    pMenu->DeleteMenu(ID_SHOW_TASK_BAR_WND, MF_BYCOMMAND);
+#else
     pMenu->CheckMenuItem(ID_SHOW_MAIN_WND, MF_BYCOMMAND | (!theApp.m_cfg_data.m_hide_main_window ? MF_CHECKED : MF_UNCHECKED));
+#endif
 
     pMenu->EnableMenuItem(ID_SELECT_ALL_CONNECTION, MF_BYCOMMAND | (theApp.m_general_data.show_all_interface ? MF_GRAYED : MF_ENABLED));
     pMenu->EnableMenuItem(ID_CHECK_UPDATE, MF_BYCOMMAND | (theApp.IsCheckingForUpdate() ? MF_GRAYED : MF_ENABLED));
+
+    bool auto_run_enabled = theApp.GetAutoRun(nullptr, false) || theApp.GetAutoRun(nullptr, true);
+    pMenu->CheckMenuItem(ID_AUTO_RUN_WHEN_START, MF_BYCOMMAND | (auto_run_enabled ? MF_CHECKED : MF_UNCHECKED));
 
     //pMenu->SetDefaultItem(ID_NETWORK_INFO);
     //设置默认菜单项
@@ -1266,6 +1274,18 @@ BOOL CTaskBarDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 {
     // TODO: 在此添加专用代码和/或调用基类
     UINT uMsg = LOWORD(wParam);
+#ifdef TASKBAR_ONLY
+    if (uMsg == ID_AUTO_RUN_WHEN_START)
+    {
+        ::SendMessage(theApp.m_pMainWnd->GetSafeHwnd(), WM_COMMAND, wParam, lParam);
+        return TRUE;
+    }
+    if (uMsg == ID_APP_EXIT)
+    {
+        ::PostQuitMessage(0);
+        return TRUE;
+    }
+#endif
     if (uMsg == ID_SELECT_ALL_CONNECTION || uMsg == ID_SELETE_CONNECTION
         || (uMsg > ID_SELECT_ALL_CONNECTION && uMsg <= ID_SELETE_CONNECTION_MAX))
     {

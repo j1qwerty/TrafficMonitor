@@ -115,6 +115,7 @@ BEGIN_MESSAGE_MAP(CTrafficMonitorDlg, CDialog)
     ON_COMMAND(ID_CHANGE_NOTIFY_ICON, &CTrafficMonitorDlg::OnChangeNotifyIcon)
     ON_COMMAND(ID_ALOW_OUT_OF_BORDER, &CTrafficMonitorDlg::OnAlowOutOfBorder)
     ON_COMMAND(ID_CHECK_UPDATE, &CTrafficMonitorDlg::OnCheckUpdate)
+    ON_COMMAND(ID_AUTO_RUN_WHEN_START, &CTrafficMonitorDlg::OnAutoRunWhenStart)
     ON_MESSAGE(WM_TASKBAR_MENU_POPED_UP, &CTrafficMonitorDlg::OnTaskbarMenuPopedUp)
     ON_COMMAND(ID_SHOW_NET_SPEED, &CTrafficMonitorDlg::OnShowNetSpeed)
     ON_WM_QUERYENDSESSION()
@@ -1074,112 +1075,60 @@ BOOL CTrafficMonitorDlg::OnInitDialog()
 {
     CDialog::OnInitDialog();
 
-    // 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
-    //  执行此操作
-    SetIcon(m_hIcon, TRUE);         // 设置大图标
-    SetIcon(m_hIcon, FALSE);        // 设置小图标
+#ifndef TASKBAR_ONLY
+    SetIcon(m_hIcon, TRUE);
+    SetIcon(m_hIcon, FALSE);
+#endif
 
-    // TODO: 在此添加额外的初始化代码
     SetWindowText(APP_NAME);
-    //设置隐藏任务栏图标
     ModifyStyleEx(WS_EX_APPWINDOW, WS_EX_TOOLWINDOW);
-
     theApp.DPIFromWindow(this);
-    //获取屏幕大小
     GetScreenSize();
     m_last_screen_rects = m_screen_rects;
-    //::SystemParametersInfo(SPI_GETWORKAREA, 0, &m_screen_rect, 0);   // 获得工作区大小
-
-    //初始化菜单
     theApp.InitMenuResourse();
-    //theApp.UpdateTaskbarWndMenu();
 
-    //初始化皮肤
+#ifndef TASKBAR_ONLY
     CSkinManager::Instance().Init();
     m_skin_selected = CSkinManager::Instance().FindSkinIndex(theApp.m_cfg_data.m_skin_name);
-
-    //根据当前选择的皮肤获取布局数据
     if (LoadSkinLayout())
     {
-        //从SkinManager中获取当前皮肤的设置
         SkinSettingData cur_skin_data;
-        CSkinManager::SkinSettingDataFronSkin(cur_skin_data, m_skin);   //获取皮肤的默认设置
-        CSkinManager::Instance().GetSkinSettingDataByIndex(m_skin_selected, cur_skin_data); //获取皮肤的用户保存的数据
+        CSkinManager::SkinSettingDataFronSkin(cur_skin_data, m_skin);
+        CSkinManager::Instance().GetSkinSettingDataByIndex(m_skin_selected, cur_skin_data);
         theApp.m_main_wnd_data.FormSkinSettingData(cur_skin_data);
     }
-
-    //设置窗口透明度
     SetTransparency();
-
-    IniConnection();    //初始化连接
-
-    //如果启动时设置了鼠标穿透或隐藏主窗口，并且没有显示任务栏窗口，则显示通知区图标
-    if ((theApp.m_main_wnd_data.m_mouse_penetrate || theApp.m_cfg_data.m_hide_main_window) && !theApp.m_cfg_data.m_show_task_bar_wnd)
-        theApp.m_general_data.show_notify_icon = true;
-
-    //载入通知区图标
-    theApp.m_notify_icons[0] = (HICON)LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_NOFITY_ICON), IMAGE_ICON, theApp.DPI(16), theApp.DPI(16), LR_DEFAULTCOLOR | LR_CREATEDIBSECTION);
-    theApp.m_notify_icons[1] = (HICON)LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_NOFITY_ICON2), IMAGE_ICON, theApp.DPI(16), theApp.DPI(16), LR_DEFAULTCOLOR | LR_CREATEDIBSECTION);
-    theApp.m_notify_icons[2] = (HICON)LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_NOFITY_ICON3), IMAGE_ICON, theApp.DPI(16), theApp.DPI(16), LR_DEFAULTCOLOR | LR_CREATEDIBSECTION);
-    theApp.m_notify_icons[3] = (HICON)LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_MAINFRAME), IMAGE_ICON, theApp.DPI(16), theApp.DPI(16), LR_DEFAULTCOLOR | LR_CREATEDIBSECTION);
-    theApp.m_notify_icons[4] = (HICON)LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_NOFITY_ICON4), IMAGE_ICON, theApp.DPI(16), theApp.DPI(16), LR_DEFAULTCOLOR | LR_CREATEDIBSECTION);
-    theApp.m_notify_icons[5] = (HICON)LoadImage(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDI_NOTIFY_ICON5), IMAGE_ICON, theApp.DPI(16), theApp.DPI(16), LR_DEFAULTCOLOR | LR_CREATEDIBSECTION);
-
-    //设置通知区域图标
-    m_ntIcon.cbSize = sizeof(NOTIFYICONDATA);   //该结构体变量的大小
-    if (theApp.m_cfg_data.m_notify_icon_selected < 0 || theApp.m_cfg_data.m_notify_icon_selected >= MAX_NOTIFY_ICON)
-        theApp.m_cfg_data.m_notify_icon_selected = 0;
-    m_ntIcon.hIcon = theApp.m_notify_icons[theApp.m_cfg_data.m_notify_icon_selected];       //设置图标
-    m_ntIcon.hWnd = this->m_hWnd;               //接收托盘图标通知消息的窗口句柄
-    CString atip;           //鼠标指向图标时显示的提示
-#ifdef _DEBUG
-    atip = CCommon::LoadText(IDS_TRAFFICMONITOR, _T(" (Debug)"));
-#else
-    atip = CCommon::LoadText(IDS_TRAFFICMONITOR);
 #endif
-    //wcscpy_s(m_ntIcon.szTip, 128, strTip);
-    CCommon::WStringCopy(m_ntIcon.szTip, 128, atip.GetString());
-    m_ntIcon.uCallbackMessage = MY_WM_NOTIFYICON;   //应用程序定义的消息ID号
-    m_ntIcon.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP; //图标的属性：设置成员uCallbackMessage、hIcon、szTip有效
-    if (theApp.m_general_data.show_notify_icon)
-        ::Shell_NotifyIcon(NIM_ADD, &m_ntIcon); //在系统通知区域增加这个图标
 
-    //载入流量历史记录
+    IniConnection();
     LoadHistoryTraffic();
 
-    //设置1000毫秒触发的定时器
-    SetTimer(MAIN_TIMER, 1000, NULL);
-
+#ifdef TASKBAR_ONLY
     SetTimer(MONITOR_TIMER, theApp.m_general_data.monitor_time_span, NULL);
     AfxBeginThread(MonitorThreadCallback, (LPVOID)this);
-
-    //初始化窗口位置
+    GetLocalTime(&m_start_time);
+    OpenTaskBarWnd();
+    SetTimer(TASKBAR_TIMER, 1000, NULL);
+#else
+    SetTimer(MAIN_TIMER, 1000, NULL);
+    SetTimer(MONITOR_TIMER, theApp.m_general_data.monitor_time_span, NULL);
+    AfxBeginThread(MonitorThreadCallback, (LPVOID)this);
     SetItemPosition();
     if (theApp.m_cfg_data.m_position_x != -1 && theApp.m_cfg_data.m_position_y != -1)
         SetWindowPos(nullptr, theApp.m_cfg_data.m_position_x, theApp.m_cfg_data.m_position_y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
     CheckWindowPos();
-
-    //载入背景图片
     LoadBackGroundImage();
-
-    //设置字体
     SetTextFont();
-
-    //获取启动时的时间
     GetLocalTime(&m_start_time);
-
-    //初始化鼠标提示
     m_tool_tips.Create(this, TTS_ALWAYSTIP);
     m_tool_tips.SetMaxTipWidth(600);
     m_tool_tips.AddTool(this, _T(""));
-
-    //如果程序启动时设置了隐藏主窗口，或窗口的位置在左上角，则先将其不透明度设为0
     if (theApp.m_cfg_data.m_hide_main_window || (theApp.m_cfg_data.m_position_x == 0 && theApp.m_cfg_data.m_position_y == 0))
         SetTransparency(0);
-
     SetTimer(TASKBAR_TIMER, 100, NULL);
+#endif
 
-    return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
+    return TRUE;
 }
 
 
@@ -1582,40 +1531,29 @@ void CTrafficMonitorDlg::DoMonitorAcquisition()
 
 UINT CTrafficMonitorDlg::MonitorThreadCallback(LPVOID dwUser)
 {
-    CTrafficMonitorDlg* pThis = (CTrafficMonitorDlg*)dwUser;
+    CTrafficMonitorDlg* pThis = reinterpret_cast<CTrafficMonitorDlg*>(dwUser);
+    if (pThis == nullptr)
+        return 0;
+
     while (true)
     {
-        //获取一次监控数据
-        if (pThis->m_monitor_data_required)
-        {
-            pThis->DoMonitorAcquisition();
-            //获取到监控数据后重置flag
-            pThis->m_monitor_data_required = false;
-        }
-        else
-        {
-            Sleep(10);
-        }
-
-        // 检查退出标志
+        ::WaitForSingleObject(pThis->m_monitor_request_event.m_hObject, INFINITE);
         if (pThis->m_is_thread_exit)
-        {
-            // 触发事件，通知主线程工作线程已退出
-            pThis->m_threadExitEvent.SetEvent();
-            return 0;
-        }
+            break;
+
+        pThis->DoMonitorAcquisition();
+        pThis->m_monitor_data_required = false;
     }
 
+    pThis->m_threadExitEvent.SetEvent();
     return 0;
 }
 
 
 void CTrafficMonitorDlg::ExitMonitorThread()
 {
-    // 通知线程退出
     m_is_thread_exit = true;
-
-    // 等待线程退出
+    m_monitor_request_event.SetEvent();
     ::WaitForSingleObject(m_threadExitEvent.m_hObject, 1000);
 }
 
@@ -1625,8 +1563,8 @@ void CTrafficMonitorDlg::OnTimer(UINT_PTR nIDEvent)
     // TODO: 在此添加消息处理程序代码和/或调用默认值
     if (nIDEvent == MONITOR_TIMER)
     {
-        //通知线程获取监控数据
         m_monitor_data_required = true;
+        m_monitor_request_event.SetEvent();
     }
 
     if (nIDEvent == MAIN_TIMER)
@@ -2556,6 +2494,9 @@ void CTrafficMonitorDlg::OnMousePenetrate()
 
 void CTrafficMonitorDlg::OnShowTaskBarWnd()
 {
+#ifdef TASKBAR_ONLY
+    return;
+#else
     // TODO: 在此添加命令处理程序代码
     if (m_tBarDlg != nullptr)
     {
@@ -2577,6 +2518,7 @@ void CTrafficMonitorDlg::OnShowTaskBarWnd()
         }
     }
     theApp.SaveConfig();
+#endif
 }
 
 
@@ -2613,6 +2555,9 @@ LRESULT CTrafficMonitorDlg::OnTaskBarCreated(WPARAM wParam, LPARAM lParam)
 
 void CTrafficMonitorDlg::OnShowMainWnd()
 {
+#ifdef TASKBAR_ONLY
+    return;
+#else
     // TODO: 在此添加命令处理程序代码
     if (!theApp.m_cfg_data.m_hide_main_window)
     {
@@ -2631,6 +2576,7 @@ void CTrafficMonitorDlg::OnShowMainWnd()
         theApp.m_cfg_data.m_hide_main_window = false;
     }
     theApp.SaveConfig();
+#endif
 }
 
 
@@ -2767,6 +2713,32 @@ void CTrafficMonitorDlg::OnCheckUpdate()
     theApp.CheckUpdateInThread(true);
 }
 
+void CTrafficMonitorDlg::OnAutoRunWhenStart()
+{
+    bool registry_auto_run = theApp.GetAutoRun(nullptr, false);
+    bool task_scheduler_auto_run = theApp.GetAutoRun(nullptr, true);
+    bool currently_enabled = registry_auto_run || task_scheduler_auto_run;
+
+#ifdef WITHOUT_TEMPERATURE
+    // Lite uses the per-user Registry startup entry and avoids the elevated task-scheduler path.
+    const bool enable = !currently_enabled;
+    if (theApp.SetAutoRun(enable, false))
+    {
+        theApp.m_general_data.auto_run = enable;
+    }
+#else
+    // Full builds keep the user's existing startup method where possible.
+    const bool enable = !currently_enabled;
+    const bool use_task_scheduler = task_scheduler_auto_run;
+    if (theApp.SetAutoRun(enable, use_task_scheduler))
+    {
+        theApp.m_general_data.auto_run = enable;
+        theApp.m_general_data.auto_run_by_task_scheduler = use_task_scheduler;
+    }
+#endif
+    theApp.SaveConfig();
+}
+
 
 afx_msg LRESULT CTrafficMonitorDlg::OnTaskbarMenuPopedUp(WPARAM wParam, LPARAM lParam)
 {
@@ -2873,6 +2845,10 @@ afx_msg LRESULT CTrafficMonitorDlg::OnDpichanged(WPARAM wParam, LPARAM lParam)
 
 afx_msg LRESULT CTrafficMonitorDlg::OnTaskbarWndClosed(WPARAM wParam, LPARAM lParam)
 {
+#ifdef TASKBAR_ONLY
+    theApp.m_cfg_data.m_show_task_bar_wnd = true;
+    PostMessage(WM_REOPEN_TASKBAR_WND, 0, 0);
+#else
     theApp.m_cfg_data.m_show_task_bar_wnd = false;
     //关闭任务栏窗口后，如果没有显示通知区图标，且没有显示主窗口或设置了鼠标穿透，则将通知区图标显示出来
     if (!theApp.m_general_data.show_notify_icon && theApp.IsForceShowNotifyIcon())
@@ -2887,16 +2863,15 @@ afx_msg LRESULT CTrafficMonitorDlg::OnTaskbarWndClosed(WPARAM wParam, LPARAM lPa
 
 afx_msg LRESULT CTrafficMonitorDlg::OnMonitorInfoUpdated(WPARAM wParam, LPARAM lParam)
 {
-    Invalidate(FALSE);      //刷新窗口信息
-
-    //更新鼠标提示
+#ifndef TASKBAR_ONLY
+    Invalidate(FALSE);
     if (theApp.m_main_wnd_data.show_tool_tip && m_tool_tips.GetSafeHwnd() != NULL)
     {
         CString tip_info;
         tip_info = GetMouseTipsInfo();
         m_tool_tips.UpdateTipText(tip_info, this);
     }
-    //更新任务栏窗口鼠标提示
+#endif
     if (IsTaskbarWndValid())
         m_tBarDlg->UpdateToolTips();
     return 0;
@@ -2906,7 +2881,12 @@ afx_msg LRESULT CTrafficMonitorDlg::OnMonitorInfoUpdated(WPARAM wParam, LPARAM l
 LRESULT CTrafficMonitorDlg::OnDisplaychange(WPARAM wParam, LPARAM lParam)
 {
     GetScreenSize();
+#ifdef TASKBAR_ONLY
+    if (IsTaskbarWndValid())
+        m_tBarDlg->AdjustWindowPos(true);
+#else
     CheckWindowPos(true);
+#endif
     return 0;
 }
 

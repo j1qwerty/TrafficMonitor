@@ -131,8 +131,9 @@ protected:
 
     void DoMonitorAcquisition();    //获取一次监控信息
     static UINT MonitorThreadCallback(LPVOID dwUser);   //获取监控信息的线程函数
-    bool m_monitor_data_required{ false };          //线程中需要获取监控数据标志，当需要获取监控数据时置为true，获取到一次监控数据时置为false
-    bool m_is_thread_exit{ false }; //线程退出标志
+    bool m_monitor_data_required{ false };
+    bool m_is_thread_exit{ false };
+    CEvent m_monitor_request_event; //线程退出标志
     CEvent m_threadExitEvent;       //用于通知主线程工作线程已退出
 public:
     void ExitMonitorThread();       //停止监控线程
@@ -252,6 +253,7 @@ public:
     afx_msg void OnChangeNotifyIcon();
     afx_msg void OnAlowOutOfBorder();
     afx_msg void OnCheckUpdate();
+    afx_msg void OnAutoRunWhenStart();
 protected:
     afx_msg LRESULT OnTaskbarMenuPopedUp(WPARAM wParam, LPARAM lParam);
 public:

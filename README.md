@@ -1,139 +1,130 @@
-**简体中文 | [English](./README_en-us.md)**
+# TrafficMonitor
 
-[![Badge](https://img.shields.io/badge/link-996.icu-%23FF4D5B.svg?style=flat-square)](https://996.icu/#/en_US)
-[![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg?style=flat-square)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/zhongyang219/TrafficMonitor/main.yml?branch=master&label=Release%20CI&logo=github&style=flat-square)](https://github.com/zhongyang219/TrafficMonitor/actions?query=workflow:"Release+CI")
-[![GitHub release](https://img.shields.io/github/release/zhongyang219/TrafficMonitor.svg?style=flat-square)](https://github.com/zhongyang219/TrafficMonitor/releases/latest)
+TrafficMonitor is a Windows system monitor for real-time network speed and system resource usage. This fork makes English the default language and adds a taskbar-only Lite build that avoids creating the floating-window UI.
 
-<a href="https://hellogithub.com/repository/5ef48af2b2794d4798b17d6539ec7305" target="_blank"><img src="https://api.hellogithub.com/v1/widgets/recommend.svg?rid=5ef48af2b2794d4798b17d6539ec7305&claim_uid=CeVqou2T1dIvfQP" alt="Featured｜HelloGitHub" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+## Features
 
-# TrafficMonitor 简介
+- Real-time upload and download speed monitoring.
+- CPU usage and memory usage monitoring with percentage, used-memory, and available-memory display modes.
+- CPU frequency, GPU usage, and hard-disk usage monitoring.
+- Optional CPU, GPU, hard-disk, and motherboard temperature monitoring in the non-Lite build.
+- Automatic, manual, or all-interface network adapter selection.
+- Hidden-interface filtering, connection refresh, and detailed network information.
+- Taskbar embedding with Windows 7/8/10/11-specific handling and Wine support.
+- Secondary-display taskbar placement and DPI-aware positioning.
+- Custom taskbar item order, labels, fonts, colors, transparency, spacing, alignment, margins, and display units.
+- Upload, download, CPU, memory, GPU, disk, CPU frequency, total speed, today's traffic, and plugin display items.
+- Byte/bit units, automatic/fixed speed units, hidden units, hidden percentage signs, and compact speed formatting.
+- CPU/memory status bars and network-speed graphs with bar or plot modes.
+- Light/dark theme adaptation and automatic taskbar background-color handling.
+- Tooltips and configurable double-click actions.
+- Historical traffic statistics with day, week, month, quarter, and year views.
+- Incremental current-day history saving to reduce frequent disk I/O.
+- System-tray integration with theme-aware tray icons and tooltip information.
+- Traffic, memory, hardware, and plugin notifications where applicable.
+- Configurable floating-window skins, per-skin fonts/colors/text/layout, skin auto-adaptation, BMP/PNG backgrounds, and INI/XML skin configuration in the full build.
+- Plugin DLL loading with display items, commands, menus, options, configuration, enable/disable management, notifications, tooltips, and mouse/keyboard callbacks.
+- Automatic update checks with GitHub or Gitee sources.
+- Windows startup support through Registry or Task Scheduler.
+- Portable or AppData-based configuration.
+- Configurable monitoring interval and CPU-usage acquisition method.
+- Multi-language packs with English as the default language in this fork.
+- Crash reporting, diagnostic logging, and rendering fallback support.
+- DPI-aware UI behavior and Windows 11 taskbar placement/overlap options.
 
-Traffic Monitor是一款用于Windows平台的网速监控悬浮窗软件，可以显示当前网速、CPU及内存利用率，支持嵌入到任务栏显示，支持更换皮肤、历史流量统计等功能。
+## Standard and Lite builds
 
-# 相关链接：
+| Build | Floating window | Taskbar | Temperature monitoring |
+| --- | --- | --- | --- |
+| Standard | Yes | Yes | Yes |
+| Lite | No | Yes | No |
 
-请[点击此处](https://github.com/zhongyang219/TrafficMonitor/releases/latest)下载TrafficMonitor的最新版本。
+The existing Lite configuration already excludes the temperature-monitoring subsystem. This fork additionally defines `TASKBAR_ONLY` for Lite so the floating window is not created or initialized at runtime.
 
-备用链接：[百度网盘下载](https://pan.baidu.com/s/15PMt7s-ASpyDwtS__4cUhg) 提取码：`ou0m`
+## Taskbar-only Lite
 
-国内用户如果遇到Github下载缓慢的问题，可以[点击此处](https://gitee.com/zhongyang219/TrafficMonitor)转到此项目在Gitee上的页面。
+The Lite build is compiled with `WITHOUT_TEMPERATURE` and `TASKBAR_ONLY`.
 
-如果遇到问题，请[点击此处](./Help.md)查看常见问题。
+- The floating window is not shown or initialized; a hidden controller remains only because the current architecture shares monitoring/controller code with the taskbar window.
+- The taskbar monitor is created immediately and is the only visible monitoring UI.
+- Floating-window skin loading, positioning, background-image loading, layout, and floating-window tooltips are skipped.
+- The floating-window settings tab is omitted from the Lite Options dialog.
+- The taskbar menu does not expose controls for showing/hiding the floating window or closing the taskbar monitor.
+- The controller taskbar-management timer runs at 1 second instead of the full build's 100 ms timer.
+- The monitor worker waits on an event instead of polling every 10 ms while idle.
+- GDI+ initialization for the floating-window skin pipeline is skipped.
+- The system tray remains available for notifications and recovery.
 
-你也可以[点击此处](https://github.com/zhongyang219/TrafficMonitor/actions?query=workflow:"Release+CI")下载TrafficMonitor的预发行构建版本。
+## Network monitoring
 
-从1.80版本开始，TrafficMonitor加入了温度监控功能，如果你不需要温度监控功能，并且在使用1.80以上版本中遇到了问题，建议下载不含温度监控的版本（Lite版本）。（在Release页面找到文件名包含`Lite`的版本。）
+- Automatically select the active network adapter.
+- Manually select a specific adapter.
+- Aggregate all network adapters.
+- Hide selected adapters from selection lists.
+- Refresh the network-adapter list.
+- View detailed connection information.
 
-TrafficMonitor依赖于Microsoft Visual C++ 运行环境，如果程序启动时提示“找不到MSVC*.dll”，请点击以下链接下载并安装Microsoft Visual C++ 运行环境。
+## Taskbar display customization
 
-[最新支持的 Visual C++ 可再发行程序包下载 | Microsoft Docs](https://docs.microsoft.com/zh-CN/cpp/windows/latest-supported-vc-redist?view=msvc-170)
+Taskbar output supports upload/download, CPU, memory, GPU usage, disk usage, CPU frequency, total speed, today's traffic, and plugin-provided display items. Users can customize ordering, labels, colors, fonts, transparency, spacing, layout, units, compact formatting, status bars, and network-speed graphs.
 
-# 版本说明
+Windows 11-specific taskbar options include placement offsets, snapping close to taskbar icons, and avoiding overlap with right-side widgets.
 
-TrafficMonitor提供了标准版和Lite版两种版本可用。标准版包含了所有的功能，Lite版本则不包含温度监控、显卡利用率、硬盘利用率等硬件监控功能。标准版运行需要管理员权限，而Lite版本则不需要。
+## History
 
-如果没有监控温度等硬件信息的需要，建议使用Lite版。
+Traffic history is persisted to disk and can be viewed by day, week, month, quarter, or year. The current day's record is saved incrementally to reduce unnecessary I/O.
 
-以下是两个版本功能对比。
+## Skins
 
-| 功能                          | 标准版 | Lite版 |
-| ----------------------------- | ------ | ------ |
-| 网速监控                      | ✔      | ✔      |
-| CPU、内存利用率          | ✔      | ✔      |
-| CPU、显卡、硬盘、主板温度监控  | ✔      | ❌      |
-| CPU频率监控 | ✔ | ✔ |
-| 显卡利用率监控                | ✔      | ✔     |
-| 硬盘利用率监控                | ✔      | ✔     |
-| 网络详细信息                  | ✔      | ✔      |
-| 插件系统                      | ✔      | ✔      |
-| 主窗口更换皮肤                | ✔      | ✔      |
-| 需要管理员权限                | 是     | 否     |
+The full floating-window build supports built-in and custom skins, per-skin fonts, text colors, display strings and layout, light/dark skin adaptation, BMP/PNG backgrounds, and INI/XML skin configuration.
 
-注：从1.86版本开始，TrafficMonitor Lite版也提供了显卡和硬盘利用率监控功能，相比标准版仅少了温度监控功能。后续TrafficMonitor中的温度监控功能将不再维护，TrafficMonitor将不再提供标准版，仅提供Lite版。温度监控功能已经迁移到了[硬件监控插件](https://github.com/zhongyang219/TrafficMonitorPlugins/blob/main/download/plugin_download.md#%E7%A1%AC%E4%BB%B6%E7%9B%91%E6%8E%A7%E6%8F%92%E4%BB%B6)，如果需要使用温度监控功能，请下载硬件监控插件。
+The taskbar-only Lite build does not initialize the floating-window skin pipeline.
 
-# 主要特性
+## Plugins
 
-* 显示当前实现网络传输速率、CPU和内存占用率
-* 如果电脑有多个网卡，支持自动和手动选择网络连接
-* 查看网络详细信息
-* 支持嵌入到任务栏显示
-* 支持更换皮肤和自定义皮肤
-* 历史流量统计
-* 硬件信息监控
-* 插件系统
-# 使用说明
+Plugins are DLLs loaded from the `plugins` directory. The plugin system supports additional display items, commands and menus, plugin-specific options/configuration, enable/disable management, tooltips, mouse/keyboard events, notifications, and monitor-data callbacks.
 
-**[点击这里](https://github.com/zhongyang219/TrafficMonitor/wiki)转到Wiki页面查看关于TrafficMonitor的详细说明文档。**
+## Notifications and system tray
 
-# 截图
+TrafficMonitor supports system-tray icons, light/dark-aware icon selection, traffic and memory threshold alerts, hardware alerts where hardware monitoring is available, plugin notifications, and tooltip information.
 
-主悬浮窗：
-![](./Screenshots/main1.png)
+## Configuration
 
-右键菜单：
-![](./Screenshots/main.png)
+- English is the default language for a fresh configuration; explicit existing language selections remain supported.
+- Portable mode or AppData configuration.
+- Configurable monitoring interval.
+- CPU usage acquisition by CPU-time or PDH.
+- Automatic update checking with GitHub/Gitee source selection.
+- Registry or Task Scheduler startup.
+- Configurable notification intervals and thresholds.
 
-任务栏窗口：
+## Performance and size
 
-![](./Screenshots/taskbar.PNG)
+This fork targets runtime CPU/memory overhead in the Lite build. The current shared-controller architecture means the floating-window source code and resources are still part of the project, so this PR does not claim a measured executable-size reduction.
 
-多彩皮肤：
-<img src="./Screenshots/skins.PNG" style="zoom:80%;" />
+Implemented:
 
-# 如何使用
-程序启动后在会在屏幕中显示一个显示网速的悬浮窗。在悬浮窗上点击鼠标右键可以弹出右键菜单。
+- No floating-window creation or runtime initialization in Lite.
+- No GDI+ startup in Lite.
+- No floating-window settings page in Lite.
+- Lower-frequency controller timer in Lite.
+- Event-driven monitor worker instead of 10 ms idle polling.
+- Existing temperature-free Lite configuration retained.
 
-TrafficMonitor支持将信息显示到任务栏。但是TrafficMonitor默认只显示主窗口（悬浮窗），如果需要让它嵌入到任务栏显示，请在右键菜单中选择“显示任务栏窗口”命令。
+For a second-stage size reduction, the shared controller should be split into a monitor service and taskbar UI so floating-window source files and resources can be excluded from the Lite target entirely. Other possible opt-in reductions are lazy plugin initialization, optional tray/notification support, and opt-in update checking for an ultra-minimal profile. These should be benchmarked on real Windows builds before changing defaults.
 
-任务栏窗口支持自定义显示项目，默认情况下只显示网速，如果需要显示CPU和内存利用率等其他信息，请在任务栏窗口右键菜单中选择“显示设置”，在弹出的“显示设置”对话框中勾选需要显示的项目，如下图所示：
+## Build
 
-<img src="./Screenshots/taskbar_item_settings.png" style="zoom:80%;" />
+The project uses Visual Studio and MFC. Existing solutions provide standard and Lite configurations for x86, x64, and ARM64EC. The Lite configurations in this fork additionally define `TASKBAR_ONLY`.
 
-# 自定义皮肤
-<img src="./Screenshots/selecte_skin.png" style="zoom:80%;" />
+## Links
 
-在主窗口或通知区图标右键菜单上选择“其他功能”——“更换皮肤”可以打开更换皮肤界面。[点击此处](https://github.com/zhongyang219/TrafficMonitorSkin/blob/master/皮肤下载.md)可以下载更多皮肤。用户还可以根据自己的需要编辑自己的皮肤。
+- Upstream: https://github.com/zhongyang219/TrafficMonitor
+- This fork: https://github.com/j1qwerty/TrafficMonitor
+- Releases: https://github.com/j1qwerty/TrafficMonitor/releases
 
-皮肤文件放在程序所在目录的`skins`目录下，每个皮肤被放到单独的文件夹下，文件夹的名称就是皮肤的名称。
+TrafficMonitor requires the Microsoft Visual C++ runtime.
 
-其中`background.bmp`和`background_l.bmp`是背景图片，`skin.ini`是皮肤的配置文件，可以通过`skin.ini`指定文本颜色、字体、皮肤作者、每个项目的大小和位置等信息。
+## License
 
-从1.80版本开始增加了xml格式的皮肤配置文件`skin.xml`，只有xml格式的皮肤配置文件才支持温度和显卡使用率显示。
-
-从1.85版本开始增加了对png格式背景图片的支持，你可以使用png格式来制作带透明背景的皮肤，背景图片的文件名为`background.png`和`background_l.png`。
-
-详细的皮肤制作教程请点击以下链接：
-
-[皮肤制作教程 · zhongyang219/TrafficMonitor Wiki (github.com)](https://github.com/zhongyang219/TrafficMonitor/wiki/皮肤制作教程)
-
-# 选项设置
-<img src="./Screenshots/option.jpg" style="zoom:80%;" />
-
-在右键菜单选择“选项...”可以进入选项设置。在选项设置对话框中，可以单独设置主窗口和任务栏窗口的文本颜色、字体、背景颜色、网速单位、显示的文本等。
-
-在“常规设置”选项卡中，可以设置是否在程序时自动检查更新，以及是否需要在开机是自动运行。可以设置在什么时候需要发出消息通知。
-
-从1.72版本开始，支持每个项目文本颜色单独设置。勾选“指定每个项目的颜色”后，点击“文本颜色”右边的颜色框，会弹出详细颜色设置的对话框，可以在这里单独指定每个项目的颜色。
-
-# 插件系统
-
-从1.82版本开始增加了插件系统，插件dll必须放在“TrafficMonitor.exe”同级目录的“plugins”目录下。程序启动后，插件会自动加载。你可以在右键菜单“更多功能”——“插件管理”中查看并管理已加载的插件。
-
-关于如何开发TrafficMonitor的说明，请参见[插件开发指南 · zhongyang219/TrafficMonitor Wiki (github.com)](https://github.com/zhongyang219/TrafficMonitor/wiki/插件开发指南)。
-
-要下载TrafficMonitor插件，请[点击这里](https://github.com/zhongyang219/TrafficMonitorPlugins/blob/main/download/plugin_download.md)。
-
-# 关于硬件监控功能
-
-从1.80版本开始，TrafficMonitor加入了硬件监控功能（包括温度监控和显卡使用率监控、CPU频率监控），它使用了第三方开源库[LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor)。如果你在使用温度监控功能时遇到了问题，请[点击这里](./Help.md#13-关于trafficmonitor温度监控的问题)。
-
-需要注意的是，温度监控功能默认是关闭的，如果你要使用TrafficMonitor的温度监控功能，请到[“选项设置”-“常规设置”-“硬件监控”](https://github.com/zhongyang219/TrafficMonitor/wiki/选项设置#硬件监控)中开启。
-
-**注意：硬件监控功能（包括温度监控和显卡使用率监控）可能存在一些问题，它可能会占用更多的CPU和内存。据部分用户反馈，开启温度功能后会导致程序崩溃和系统死机等问题，请在知晓以上风险后再决定开启硬件监控功能。否则，请不要使用硬件监控功能。**
-
-
-
-# 更新日志
-
-**[点击此处查看更新日志](./UpdateLog/update_log.md)**
+See [LICENSE](./LICENSE).
