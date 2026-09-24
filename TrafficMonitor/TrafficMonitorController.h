@@ -52,13 +52,13 @@ protected:
     int m_cannot_insert_to_task_bar_warning{ true };
     static unsigned int m_WM_TASKBARCREATED;
     SYSTEMTIME m_start_time{};
-    CHistoryTrafficFile m_history_traffic{ theApp.m_history_traffic_path };
+    CHistoryTrafficFile m_history_traffic;
     bool m_connection_change_flag{};
     bool m_is_thread_exit{};
     bool m_monitor_data_required{};
     CEvent m_monitor_request_event;
     CEvent m_threadExitEvent;
-    string m_connection_name_preferd{ theApp.m_cfg_data.m_connection_name };
+    string m_connection_name_preferd;
 
     void AutoSelect();
     void IniConnection();
