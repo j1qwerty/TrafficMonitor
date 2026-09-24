@@ -111,5 +111,5 @@ protected:
     afx_msg void OnRefreshConnectionList();
     afx_msg void OnPluginOptionsTaksbar();
     afx_msg void OnPluginDetailTaksbar();
-    afx_msg UINT OnPowerBroadcast(UINT, LPARAM);
+    afx_msg UINT OnPowerBroadcast(UINT nPowerEvent, LPARAM nEventData);
 };

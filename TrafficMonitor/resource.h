@@ -76,6 +76,7 @@
 #define IDI_ICON1                       343
 #define IDI_PLUGIN_DISABLED             343
 #define IDD_WIN11_TASKBAR_SETTING_DLG   344
+#define IDD_TASKBAR_MONITOR_CONTROLLER_DIALOG 349
 #define IDR_LANGUAGE                    346
 #define IDR_LANGUAGE_DEFAULT            347
 #define IDR_DISPLAY_ITEM_CONTEXT_MENU   348
@@ -468,7 +469,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        349
+#define _APS_NEXT_RESOURCE_VALUE        350
 #define _APS_NEXT_COMMAND_VALUE         33666
 #define _APS_NEXT_CONTROL_VALUE         1221
 #define _APS_NEXT_SYMED_VALUE           101

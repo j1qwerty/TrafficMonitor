@@ -39,15 +39,15 @@ TrafficMonitor is a Windows system monitor for real-time network speed and syste
 | Standard | Yes | Yes | Yes |
 | Lite | No | Yes | No |
 
-The existing Lite configuration already excludes the temperature-monitoring subsystem. This fork additionally defines `TASKBAR_ONLY` for Lite so the floating window is not created or initialized at runtime.
+The existing Lite configuration excludes the temperature-monitoring subsystem. The Lite target now also uses a dedicated `CTrafficMonitorController`, so the monitor/taskbar path no longer depends on the floating-window implementation.
 
 ## Taskbar-only Lite
 
 The Lite build is compiled with `WITHOUT_TEMPERATURE` and `TASKBAR_ONLY`.
 
-- The floating window is not shown or initialized; a hidden controller remains only because the current architecture shares monitoring/controller code with the taskbar window.
+- The floating window is not part of the Lite executable path; Lite uses a dedicated non-floating controller.
 - The taskbar monitor is created immediately and is the only visible monitoring UI.
-- Floating-window skin loading, positioning, background-image loading, layout, and floating-window tooltips are skipped.
+- Floating-window skin loading, positioning, background-image loading, layout, and floating-window tooltips are excluded from the Lite target.
 - The floating-window settings tab is omitted from the Lite Options dialog.
 - The taskbar menu does not expose controls for showing/hiding the floating window or closing the taskbar monitor.
 - The controller taskbar-management timer runs at 1 second instead of the full build's 100 ms timer.
@@ -100,18 +100,38 @@ TrafficMonitor supports system-tray icons, light/dark-aware icon selection, traf
 
 ## Performance and size
 
-This fork targets runtime CPU/memory overhead in the Lite build. The current shared-controller architecture means the floating-window source code and resources are still part of the project, so this PR does not claim a measured executable-size reduction.
+The Lite target is now source-separated from the floating-window UI. `TrafficMonitorController.cpp` contains the monitor/taskbar controller used by Lite, while the floating-window controller and skin sources are explicitly excluded from all Lite configurations. Floating-window resource blocks are also omitted from the Lite resource build.
+
+This is a build-level reduction: the excluded floating-window `.cpp` files are not compiled into the Lite executable. Exact binary-size and memory changes should be measured by the Windows CI artifacts on each release.
 
 Implemented:
 
-- No floating-window creation or runtime initialization in Lite.
-- No GDI+ startup in Lite.
+- No floating-window source/object files in Lite.
+- No GDI+ startup for the floating-window skin pipeline in Lite.
 - No floating-window settings page in Lite.
 - Lower-frequency controller timer in Lite.
 - Event-driven monitor worker instead of 10 ms idle polling.
 - Existing temperature-free Lite configuration retained.
 
-For a second-stage size reduction, the shared controller should be split into a monitor service and taskbar UI so floating-window source files and resources can be excluded from the Lite target entirely. Other possible opt-in reductions are lazy plugin initialization, optional tray/notification support, and opt-in update checking for an ultra-minimal profile. These should be benchmarked on real Windows builds before changing defaults.
+Further reductions can come from optional plugin loading, optional tray/notification support, and opt-in update checking. These should be benchmarked on real Windows builds before changing defaults.
+
+## Releases
+
+Release CI builds x86, x64, and ARM64EC Lite packages and publishes a GitHub Release from `version.info`.
+
+A release is triggered by a push to `master` whose commit message contains `[release]`:
+
+```powershell
+# 1. Update the version in version.info
+# 2. Commit with the release flag
+git add version.info
+git commit -m "Release 1.87 [release]"
+git push origin master
+```
+
+The workflow reads the version from <version>...</version>, creates the matching `v<version>` Git tag/release, and attaches the three Lite ZIP packages. Normal pushes to `master` do not publish a release. Pull requests run the Windows Lite build as CI validation. The workflow can also be started manually from **Actions → Release CI → Run workflow**.
+
+Do not reuse an existing release version; the workflow stops when the `v<version>` release already exists.
 
 ## Build
 
