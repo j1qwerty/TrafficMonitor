@@ -85,6 +85,26 @@ CTrafficMonitorController* CTrafficMonitorController::Instance()
     return dynamic_cast<CTrafficMonitorController*>(theApp.m_pMainWnd);
 }
 
+LRESULT CTrafficMonitorController::OnTaskBarCreated(WPARAM wParam, LPARAM lParam)
+{
+    UNREFERENCED_PARAMETER(wParam);
+    UNREFERENCED_PARAMETER(lParam);
+
+    if (m_tBarDlg != nullptr)
+    {
+        CloseTaskBarWnd();
+        if (theApp.m_general_data.show_notify_icon)
+            ::Shell_NotifyIcon(NIM_ADD, &m_ntIcon);
+        OpenTaskBarWnd();
+    }
+    else
+    {
+        if (theApp.m_general_data.show_notify_icon)
+            ::Shell_NotifyIcon(NIM_ADD, &m_ntIcon);
+    }
+    return LRESULT();
+}
+
 
 
 
@@ -324,6 +344,36 @@ LRESULT CTrafficMonitorController::OnDisplaychange(WPARAM, LPARAM)
     if (IsTaskbarWndValid())
         m_tBarDlg->AdjustWindowPos(true);
     return 0;
+}
+
+UINT CTrafficMonitorController::OnPowerBroadcast(UINT nPowerEvent, LPARAM nEventData)
+{
+    if (nPowerEvent == PBT_APMRESUMESUSPEND)
+    {
+        KillTimer(INIT_CONNECT_TIMER);
+        static CTrafficMonitorController* pThis = this;
+        static int check_times = 0;
+        SetTimer(INIT_CONNECT_TIMER, 10000, [](HWND, UINT, UINT_PTR, DWORD) {
+            pThis->IniConnection();
+            check_times++;
+
+            CString info = CCommon::LoadTextFormat(IDS_RESTORE_FROM_SLEEP_LOG, { pThis->m_restart_cnt });
+            CCommon::WriteLog(info, theApp.m_log_path.c_str());
+
+            if (pThis->m_connections.empty())
+            {
+                if (check_times >= 20)
+                    pThis->KillTimer(INIT_CONNECT_TIMER);
+            }
+            else
+            {
+                pThis->KillTimer(INIT_CONNECT_TIMER);
+                check_times = 0;
+            }
+        });
+    }
+
+    return CDialog::OnPowerBroadcast(nPowerEvent, nEventData);
 }
 
 BOOL CTrafficMonitorController::OnCommand(WPARAM wParam, LPARAM lParam)
