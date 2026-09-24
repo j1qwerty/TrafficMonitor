@@ -4,8 +4,10 @@
 #include "stdafx.h"
 #include "TrafficMonitor.h"
 #include "DisplayTextSettingDlg.h"
+#ifndef TASKBAR_ONLY
 #include "TrafficMonitorDlg.h"
 #include "SkinManager.h"
+#endif
 
 
 // CDisplayTextSettingDlg 对话框
@@ -64,6 +66,7 @@ BOOL CDisplayTextSettingDlg::OnInitDialog()
     m_list_ctrl.InsertColumn(0, CCommon::LoadText(IDS_ITEM), LVCFMT_LEFT, width0);		//插入第0列
     m_list_ctrl.InsertColumn(1, CCommon::LoadText(IDS_VALUE), LVCFMT_LEFT, width1);		//插入第1列
 
+#ifndef TASKBAR_ONLY
     //如果是主窗口，清除当前皮肤中没有的行
     if (m_main_window_text)
     {
@@ -77,6 +80,7 @@ BOOL CDisplayTextSettingDlg::OnInitDialog()
             m_display_texts.Get(display_item) = temp.GetConst(display_item);
         }
     }
+#endif
 
     //向列表中插入行
     for (auto iter = m_display_texts.GetAllItems().begin(); iter != m_display_texts.GetAllItems().end(); ++iter)
@@ -126,6 +130,7 @@ void CDisplayTextSettingDlg::OnBnClickedRestoreDefaultButton()
 {
     // TODO: 在此添加控件通知处理程序代码
     int item_count = m_list_ctrl.GetItemCount();
+#ifndef TASKBAR_ONLY
     CTrafficMonitorDlg* pMainWnd = CTrafficMonitorDlg::Instance();
     if (m_main_window_text && pMainWnd != nullptr)
     {
@@ -140,6 +145,7 @@ void CDisplayTextSettingDlg::OnBnClickedRestoreDefaultButton()
         }
     }
     else
+#endif
     {
         for (int i{}; i < item_count; i++)
         {
@@ -154,6 +160,7 @@ void CDisplayTextSettingDlg::OnRestoreDefault()
 {
     if (m_item_selected >= 0)
     {
+#ifndef TASKBAR_ONLY
         CTrafficMonitorDlg* pMainWnd = CTrafficMonitorDlg::Instance();
         if (m_main_window_text && pMainWnd != nullptr)
         {
@@ -165,6 +172,7 @@ void CDisplayTextSettingDlg::OnRestoreDefault()
             m_list_ctrl.SetItemText(m_item_selected, 1, default_text.c_str());
         }
         else
+#endif
         {
             CommonDisplayItem display_item = GetDisplayItem(m_item_selected);
             std::wstring default_text = display_item.DefaultString(m_main_window_text);
