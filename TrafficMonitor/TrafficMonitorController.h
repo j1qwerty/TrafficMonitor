@@ -52,7 +52,7 @@ protected:
     int m_cannot_insert_to_task_bar_warning{ true };
     static unsigned int m_WM_TASKBARCREATED;
     SYSTEMTIME m_start_time{};
-    CHistoryTrafficFile m_history_traffic;
+    CHistoryTrafficFile m_history_traffic{ L"" };
     bool m_connection_change_flag{};
     bool m_is_thread_exit{};
     bool m_monitor_data_required{};
