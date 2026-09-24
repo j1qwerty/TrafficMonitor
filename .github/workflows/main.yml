@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: trafficmonitor-release-\${{ github.ref }}
+  group: trafficmonitor-release-${{ github.ref }}
   cancel-in-progress: false
 
 env:
@@ -30,7 +30,7 @@ jobs:
         uses: microsoft/setup-msbuild@v3
 
       - name: Build Lite x64
-        run: msbuild "\${{ env.SOLUTION }}" -p:Configuration="\${{ env.CONFIGURATION }}" -p:Platform=x64 -p:PlatformToolset=v143
+        run: msbuild "${{ env.SOLUTION }}" -p:Configuration="${{ env.CONFIGURATION }}" -p:Platform=x64 -p:PlatformToolset=v143
 
       - name: Package x64 Lite
         shell: pwsh
@@ -42,6 +42,7 @@ jobs:
 
           New-Item -ItemType Directory -Force -Path package | Out-Null
           Copy-Item "$source/*" package/ -Recurse -Force
+          Copy-Item "$source/TrafficMonitor.exe" "TrafficMonitor_x64_Lite.exe" -Force
           Compress-Archive -Path "package/*" -DestinationPath "TrafficMonitor_x64_Lite.zip" -Force
 
       - uses: actions/upload-artifact@v7
@@ -60,7 +61,7 @@ jobs:
         uses: microsoft/setup-msbuild@v3
 
       - name: Build Lite x86
-        run: msbuild "\${{ env.SOLUTION }}" -p:Configuration="\${{ env.CONFIGURATION }}" -p:Platform=x86 -p:PlatformToolset=v143
+        run: msbuild "${{ env.SOLUTION }}" -p:Configuration="${{ env.CONFIGURATION }}" -p:Platform=x86 -p:PlatformToolset=v143
 
       - name: Package x86 Lite
         shell: pwsh
@@ -72,6 +73,7 @@ jobs:
 
           New-Item -ItemType Directory -Force -Path package | Out-Null
           Copy-Item "$source/*" package/ -Recurse -Force
+          Copy-Item "$source/TrafficMonitor.exe" "TrafficMonitor_x86_Lite.exe" -Force
           Compress-Archive -Path "package/*" -DestinationPath "TrafficMonitor_x86_Lite.zip" -Force
 
       - uses: actions/upload-artifact@v7
@@ -90,7 +92,7 @@ jobs:
         uses: microsoft/setup-msbuild@v3
 
       - name: Build Lite ARM64EC
-        run: msbuild "\${{ env.SOLUTION }}" -p:Configuration="\${{ env.CONFIGURATION }}" -p:Platform=ARM64EC -p:PlatformToolset=v143
+        run: msbuild "${{ env.SOLUTION }}" -p:Configuration="${{ env.CONFIGURATION }}" -p:Platform=ARM64EC -p:PlatformToolset=v143
 
       - name: Package ARM64EC Lite
         shell: pwsh
@@ -102,6 +104,7 @@ jobs:
 
           New-Item -ItemType Directory -Force -Path package | Out-Null
           Copy-Item "$source/*" package/ -Recurse -Force
+          Copy-Item "$source/TrafficMonitor.exe" "TrafficMonitor_ARM64EC_Lite.exe" -Force
           Compress-Archive -Path "package/*" -DestinationPath "TrafficMonitor_ARM64EC_Lite.zip" -Force
 
       - uses: actions/upload-artifact@v7
@@ -142,8 +145,8 @@ jobs:
 
       - name: Check for an existing GitHub Release
         env:
-          GH_TOKEN: \${{ github.token }}
-          TAG: \${{ steps.version.outputs.tag }}
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
         shell: bash
         run: |
           if gh release view "$TAG" >/dev/null 2>&1; then
@@ -153,8 +156,8 @@ jobs:
 
       - name: Create or validate release tag
         env:
-          TAG: \${{ steps.version.outputs.tag }}
-          TARGET_SHA: \${{ github.sha }}
+          TAG: ${{ steps.version.outputs.tag }}
+          TARGET_SHA: ${{ github.sha }}
         shell: bash
         run: |
           git fetch --tags origin
@@ -179,7 +182,7 @@ jobs:
 
       - name: Build release notes from version.info
         env:
-          VERSION: \${{ steps.version.outputs.version }}
+          VERSION: ${{ steps.version.outputs.version }}
         shell: python
         run: |
           from pathlib import Path
@@ -188,7 +191,7 @@ jobs:
           raw = Path("version.info").read_text(encoding="utf-8")
           match = re.search(r"<contents>(.*?)</contents>", raw, flags=re.S)
           highlights = match.group(1).strip() if match else ""
-          highlights = highlights.replace("\\\\n", "\\n").replace("\\\\r", "").strip()
+          highlights = highlights.replace("\\n", "\n").replace("\\r", "").strip()
 
           lines = [line.strip() for line in highlights.splitlines() if line.strip()]
 
@@ -237,9 +240,9 @@ jobs:
 
       - name: Publish GitHub Release
         env:
-          GH_TOKEN: \${{ github.token }}
-          TAG: \${{ steps.version.outputs.tag }}
-          VERSION: \${{ steps.version.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
         shell: bash
         run: |
           gh release create "$TAG" \
