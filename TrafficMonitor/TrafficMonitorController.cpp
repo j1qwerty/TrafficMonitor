@@ -56,10 +56,11 @@ BEGIN_MESSAGE_MAP(CTrafficMonitorController, CDialog)
 END_MESSAGE_MAP()
 
 CTrafficMonitorController::CTrafficMonitorController(UINT nIDTemplate, CWnd* pParent)
-    : CDialog(nIDTemplate, pParent),
-      m_history_traffic(theApp.m_history_traffic_path),
-      m_connection_name_preferd(theApp.m_cfg_data.m_connection_name)
-{}
+    : CDialog(nIDTemplate, pParent)
+{
+    m_history_traffic.SetFilePath(theApp.m_history_traffic_path);
+    m_connection_name_preferd = theApp.m_cfg_data.m_connection_name;
+}
 
 CTrafficMonitorController::~CTrafficMonitorController()
 {
