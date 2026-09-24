@@ -131,7 +131,7 @@ git push origin master
 
 The workflow validates the version, builds the x86, x64, and ARM64EC Lite packages, creates an **annotated `v<version>` Git tag**, and publishes the GitHub Release automatically. Release notes are generated from `version.info` release highlights and GitHub's automatic release-notes generator, and all three Lite ZIP packages are attached.
 
-No manual tag creation or manual GitHub Release creation is required. Normal pushes to `master` do not publish a release. Pull requests run the Windows Lite build as CI validation. The workflow can also be started manually from **Actions → Release CI → Run workflow** on `master`.
+No manual tag creation or manual GitHub Release creation is required. The release contains both the complete ZIP packages and the built Lite `.exe` files as direct downloadable assets. Normal pushes to `master` do not publish a release. Pull requests run the Windows Lite build as CI validation. The workflow can also be started manually from **Actions → Release CI → Run workflow** on `master`.
 
 Do not reuse an existing release version; the workflow stops when the `v<version>` release already exists.
 
