@@ -1224,7 +1224,7 @@ void CTrafficMonitorController::DoMonitorAcquisition()
 
 UINT CTrafficMonitorController::MonitorThreadCallback(LPVOID dwUser)
 {
-    CTrafficMonitorDlg* pThis = reinterpret_cast<CTrafficMonitorDlg*>(dwUser);
+    CTrafficMonitorController* pThis = reinterpret_cast<CTrafficMonitorController*>(dwUser);
     if (pThis == nullptr)
         return 0;
 
@@ -1254,7 +1254,7 @@ void CTrafficMonitorController::OnNetworkInfo()
     aDlg.DoModal();
     //SetAlwaysOnTop(); //由于在“连接详情”对话框内设置了取消窗口置顶，所有在对话框关闭后，重新设置窗口置顶
     if (m_tBarDlg != nullptr)
-        m_tBarDlg->m_tBarDlg->m_tool_tips.SetWindowPos(&wndTopMost, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);  //重新设置任务栏窗口的提示信息置顶
+        m_tBarDlg->m_tool_tips.SetWindowPos(&wndTopMost, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);  //重新设置任务栏窗口的提示信息置顶
 }
 
 void CTrafficMonitorController::OnShowNotifyIcon()
@@ -1424,17 +1424,11 @@ BOOL CTrafficMonitorController::OnQueryEndSession()
 
 afx_msg LRESULT CTrafficMonitorController::OnTaskbarWndClosed(WPARAM wParam, LPARAM lParam)
 {
-#ifdef TASKBAR_ONLY
+    UNREFERENCED_PARAMETER(wParam);
+    UNREFERENCED_PARAMETER(lParam);
+
     theApp.m_cfg_data.m_show_task_bar_wnd = true;
     PostMessage(WM_REOPEN_TASKBAR_WND, 0, 0);
-#else
-    theApp.m_cfg_data.m_show_task_bar_wnd = false;
-    //关闭任务栏窗口后，如果没有显示通知区图标，且没有显示主窗口或设置了鼠标穿透，则将通知区图标显示出来
-    if (!theApp.m_general_data.show_notify_icon && theApp.IsForceShowNotifyIcon())
-    {
-        AddNotifyIcon();
-        theApp.m_general_data.show_notify_icon = true;
-    }
     return 0;
 }
 
