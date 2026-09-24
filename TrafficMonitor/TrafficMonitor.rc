@@ -152,6 +152,14 @@ EXSTYLE 0x200000L
 FONT 9, "微软雅黑", 400, 0, 0x86
 BEGIN
 END
+#ifdef TASKBAR_ONLY
+IDD_TASKBAR_MONITOR_CONTROLLER_DIALOG DIALOGEX 0, 0, 1, 1
+STYLE DS_SETFONT | WS_POPUP
+FONT 1, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+END
+#endif
+
 
 
 /////////////////////////////////////////////////////////////////////////////
