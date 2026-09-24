@@ -1,5 +1,7 @@
 ﻿#pragma once
+#ifndef TASKBAR_ONLY
 #include "MainWndSettingsDlg.h"
+#endif
 #include "TaskBarSettingsDlg.h"
 #include "GeneralSettingsDlg.h"
 #include "afxcmn.h"
@@ -23,7 +25,9 @@ public:
     enum { IDD = IDD_OPTIONS_DIALOG };
 #endif
 
+#ifndef TASKBAR_ONLY
     CMainWndSettingsDlg m_tab1_dlg{ this };
+#endif
     CTaskBarSettingsDlg m_tab2_dlg{ this };
     CGeneralSettingsDlg m_tab3_dlg{ this };
 
