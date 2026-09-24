@@ -1483,8 +1483,6 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "TXT_AUTO_RUN_CHECK",           ID_AUTO_RUN_WHEN_START
         MENUITEM "TXT_EXIT",                    ID_APP_EXIT
-        END
-        MENUITEM "TXT_EXIT",                    ID_APP_EXIT
     END
 END
 
