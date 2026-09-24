@@ -115,6 +115,7 @@ BEGIN_MESSAGE_MAP(CTrafficMonitorDlg, CDialog)
     ON_COMMAND(ID_CHANGE_NOTIFY_ICON, &CTrafficMonitorDlg::OnChangeNotifyIcon)
     ON_COMMAND(ID_ALOW_OUT_OF_BORDER, &CTrafficMonitorDlg::OnAlowOutOfBorder)
     ON_COMMAND(ID_CHECK_UPDATE, &CTrafficMonitorDlg::OnCheckUpdate)
+    ON_COMMAND(ID_AUTO_RUN_WHEN_START, &CTrafficMonitorDlg::OnAutoRunWhenStart)
     ON_MESSAGE(WM_TASKBAR_MENU_POPED_UP, &CTrafficMonitorDlg::OnTaskbarMenuPopedUp)
     ON_COMMAND(ID_SHOW_NET_SPEED, &CTrafficMonitorDlg::OnShowNetSpeed)
     ON_WM_QUERYENDSESSION()
@@ -2710,6 +2711,32 @@ void CTrafficMonitorDlg::OnCheckUpdate()
 {
     // TODO: 在此添加命令处理程序代码
     theApp.CheckUpdateInThread(true);
+}
+
+void CTrafficMonitorDlg::OnAutoRunWhenStart()
+{
+    bool registry_auto_run = theApp.GetAutoRun(nullptr, false);
+    bool task_scheduler_auto_run = theApp.GetAutoRun(nullptr, true);
+    bool currently_enabled = registry_auto_run || task_scheduler_auto_run;
+
+#ifdef WITHOUT_TEMPERATURE
+    // Lite uses the per-user Registry startup entry and avoids the elevated task-scheduler path.
+    const bool enable = !currently_enabled;
+    if (theApp.SetAutoRun(enable, false))
+    {
+        theApp.m_general_data.auto_run = enable;
+    }
+#else
+    // Full builds keep the user's existing startup method where possible.
+    const bool enable = !currently_enabled;
+    const bool use_task_scheduler = task_scheduler_auto_run;
+    if (theApp.SetAutoRun(enable, use_task_scheduler))
+    {
+        theApp.m_general_data.auto_run = enable;
+        theApp.m_general_data.auto_run_by_task_scheduler = use_task_scheduler;
+    }
+#endif
+    theApp.SaveConfig();
 }
 
 
