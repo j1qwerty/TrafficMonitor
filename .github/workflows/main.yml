@@ -14,122 +14,242 @@ concurrency:
   group: trafficmonitor-release-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  SOLUTION: TrafficMonitor_Lite.sln
+  CONFIGURATION: Release (lite)
+
 jobs:
   x64_build:
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]')
+    name: Build and package Lite x64
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/master' && contains(github.event.head_commit.message, '[release]'))
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Add msbuild to PATH
+
+      - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v3
+
       - name: Build Lite x64
-        run: msbuild TrafficMonitor_Lite.sln -p:configuration="Release (lite)" -p:platform=x64 -p:platformToolset=v143
+        run: msbuild "${{ env.SOLUTION }}" -p:Configuration="${{ env.CONFIGURATION }}" -p:Platform=x64 -p:PlatformToolset=v143
+
       - name: Package x64 Lite
         shell: pwsh
         run: |
           $source = "Bin/x64/Release (lite)"
+          if (-not (Test-Path "$source/TrafficMonitor.exe")) {
+            throw "Lite x64 build output was not found at $source"
+          }
+
           New-Item -ItemType Directory -Force -Path package | Out-Null
-          Copy-Item "$source/TrafficMonitor.exe" package/
-          Get-ChildItem "$source/*.dll" -File -ErrorAction SilentlyContinue | Copy-Item -Destination package/
+          Copy-Item "$source/*" package/ -Recurse -Force
+          Copy-Item "$source/TrafficMonitor.exe" "TrafficMonitor_x64_Lite.exe" -Force
           Compress-Archive -Path "package/*" -DestinationPath "TrafficMonitor_x64_Lite.zip" -Force
+
       - uses: actions/upload-artifact@v7
         with:
           name: trafficmonitor-x64-lite
           path: TrafficMonitor_x64_Lite.zip
 
   x86_build:
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]')
+    name: Build and package Lite x86
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/master' && contains(github.event.head_commit.message, '[release]'))
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Add msbuild to PATH
+
+      - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v3
+
       - name: Build Lite x86
-        run: msbuild TrafficMonitor_Lite.sln -p:configuration="Release (lite)" -p:platform=x86 -p:platformToolset=v143
+        run: msbuild "${{ env.SOLUTION }}" -p:Configuration="${{ env.CONFIGURATION }}" -p:Platform=x86 -p:PlatformToolset=v143
+
       - name: Package x86 Lite
         shell: pwsh
         run: |
           $source = "Bin/Release (lite)"
+          if (-not (Test-Path "$source/TrafficMonitor.exe")) {
+            throw "Lite x86 build output was not found at $source"
+          }
+
           New-Item -ItemType Directory -Force -Path package | Out-Null
-          Copy-Item "$source/TrafficMonitor.exe" package/
-          Get-ChildItem "$source/*.dll" -File -ErrorAction SilentlyContinue | Copy-Item -Destination package/
+          Copy-Item "$source/*" package/ -Recurse -Force
+          Copy-Item "$source/TrafficMonitor.exe" "TrafficMonitor_x86_Lite.exe" -Force
           Compress-Archive -Path "package/*" -DestinationPath "TrafficMonitor_x86_Lite.zip" -Force
+
       - uses: actions/upload-artifact@v7
         with:
           name: trafficmonitor-x86-lite
           path: TrafficMonitor_x86_Lite.zip
 
   arm64ec_build:
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]')
+    name: Build and package Lite ARM64EC
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/master' && contains(github.event.head_commit.message, '[release]'))
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Add msbuild to PATH
+
+      - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v3
+
       - name: Build Lite ARM64EC
-        run: msbuild TrafficMonitor_Lite.sln -p:configuration="Release (lite)" -p:platform=ARM64EC -p:platformToolset=v143
+        run: msbuild "${{ env.SOLUTION }}" -p:Configuration="${{ env.CONFIGURATION }}" -p:Platform=ARM64EC -p:PlatformToolset=v143
+
       - name: Package ARM64EC Lite
         shell: pwsh
         run: |
           $source = "Bin/ARM64EC/Release (lite)"
+          if (-not (Test-Path "$source/TrafficMonitor.exe")) {
+            throw "Lite ARM64EC build output was not found at $source"
+          }
+
           New-Item -ItemType Directory -Force -Path package | Out-Null
-          Copy-Item "$source/TrafficMonitor.exe" package/
-          Get-ChildItem "$source/*.dll" -File -ErrorAction SilentlyContinue | Copy-Item -Destination package/
+          Copy-Item "$source/*" package/ -Recurse -Force
+          Copy-Item "$source/TrafficMonitor.exe" "TrafficMonitor_ARM64EC_Lite.exe" -Force
           Compress-Archive -Path "package/*" -DestinationPath "TrafficMonitor_ARM64EC_Lite.zip" -Force
+
       - uses: actions/upload-artifact@v7
         with:
           name: trafficmonitor-arm64ec-lite
           path: TrafficMonitor_ARM64EC_Lite.zip
 
   release:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/master' && contains(github.event.head_commit.message, '[release]'))
+    name: Create tag and GitHub Release
+    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master') || (github.event_name == 'push' && github.ref == 'refs/heads/master' && contains(github.event.head_commit.message, '[release]'))
     needs: [x64_build, x86_build, arm64ec_build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - uses: actions/checkout@v7
-      - name: Read release version
+        with:
+          fetch-depth: 0
+
+      - name: Read and validate release version
         id: version
         shell: bash
         run: |
-          version=$(sed -n 's:.*<version>\([^<]*\)</version>.*:\1:p' version.info | head -n 1)
-          test -n "$version"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-      - name: Check release does not already exist
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: v${{ steps.version.outputs.version }}
-        run: |
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG already exists."
+          version="$(sed -n 's:.*<version>\([^<]*\)</version>.*:\1:p' version.info | head -n 1)"
+          if [[ -z "$version" ]]; then
+            echo "version.info does not contain a <version>...</version> value."
             exit 1
           fi
+
+          if [[ ! "$version" =~ ^[0-9]+([.][0-9]+)*([-.][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid release version: $version"
+            exit 1
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Check for an existing GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        shell: bash
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "GitHub Release $TAG already exists. Refusing to overwrite it."
+            exit 1
+          fi
+
+      - name: Create or validate release tag
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+          TARGET_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          git fetch --tags origin
+
+          if git ls-remote --exit-code --refs origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            git fetch origin "refs/tags/$TAG:refs/tags/$TAG"
+            tag_target="$(git rev-list -n 1 "$TAG")"
+
+            if [[ "$tag_target" != "$TARGET_SHA" ]]; then
+              echo "Tag $TAG already exists but points to $tag_target instead of $TARGET_SHA."
+              exit 1
+            fi
+
+            echo "Tag $TAG already exists and points to the release commit; reusing it."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "$TAG" "$TARGET_SHA" -m "TrafficMonitor $TAG"
+            git push origin "$TAG"
+            echo "Created annotated tag $TAG at $TARGET_SHA."
+          fi
+
+      - name: Build release notes from version.info
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          raw = Path("version.info").read_text(encoding="utf-8")
+          match = re.search(r"<contents>(.*?)</contents>", raw, flags=re.S)
+          highlights = match.group(1).strip() if match else ""
+          highlights = highlights.replace("\\n", "\n").replace("\\r", "").strip()
+
+          lines = [line.strip() for line in highlights.splitlines() if line.strip()]
+
+          notes = [
+              f"# TrafficMonitor v{VERSION}",
+              "",
+              "## Release highlights",
+              "",
+          ]
+
+          if lines:
+              notes.extend(f"- {line}" for line in lines)
+          else:
+              notes.append("- See the automatically generated GitHub release notes below.")
+
+          notes.extend([
+              "",
+              "## Downloads",
+              "",
+              "- Lite x64",
+              "- Lite x86",
+              "- Lite ARM64EC",
+              "",
+              "The attached ZIP packages contain the complete Lite build output for each architecture.",
+          ])
+
+          Path("release-notes.md").write_text("\\n".join(notes) + "\\n", encoding="utf-8")
+
       - name: Download x64 package
         uses: actions/download-artifact@v8
         with:
           name: trafficmonitor-x64-lite
           path: release-assets/x64
+
       - name: Download x86 package
         uses: actions/download-artifact@v8
         with:
           name: trafficmonitor-x86-lite
           path: release-assets/x86
+
       - name: Download ARM64EC package
         uses: actions/download-artifact@v8
         with:
           name: trafficmonitor-arm64ec-lite
           path: release-assets/arm64ec
+
       - name: Publish GitHub Release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
           VERSION: ${{ steps.version.outputs.version }}
-          TARGET: ${{ github.sha }}
+        shell: bash
         run: |
-          gh release create "v$VERSION" \
+          gh release create "$TAG" \
             "release-assets/x64/TrafficMonitor_x64_Lite.zip" \
             "release-assets/x86/TrafficMonitor_x86_Lite.zip" \
             "release-assets/arm64ec/TrafficMonitor_ARM64EC_Lite.zip" \
-            --target "$TARGET" \
+            --verify-tag \
             --title "TrafficMonitor v$VERSION" \
+            --notes-file release-notes.md \
             --generate-notes
