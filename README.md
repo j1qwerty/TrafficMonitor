@@ -117,7 +117,7 @@ Further reductions can come from optional plugin loading, optional tray/notifica
 
 ## Releases
 
-Release CI builds x86, x64, and ARM64EC Lite packages and publishes a GitHub Release from `version.info`.
+Release CI builds the Lite **x64** package and publishes a GitHub Release from `version.info`.
 
 A release is triggered by a push to `master` whose commit message contains `[release]`:
 
@@ -129,9 +129,9 @@ git commit -m "Release 2 [release]"
 git push origin master
 ```
 
-The workflow validates the version, builds the x86, x64, and ARM64EC Lite packages, creates an **annotated `v<version>` Git tag**, and publishes the GitHub Release automatically. Release notes are generated from `version.info` release highlights and GitHub's automatic release-notes generator, and all three Lite ZIP packages are attached.
+The workflow validates the version, builds the **Lite x64** project on a Windows Server 2022 runner, creates an **annotated `v<version>` Git tag**, and publishes the GitHub Release automatically. Release notes include the fork's Lite release information plus GitHub's automatic release-note generation. The release includes both the complete ZIP package and the built `.exe`.
 
-No manual tag creation or manual GitHub Release creation is required. The release contains both the complete ZIP packages and the built Lite `.exe` files as direct downloadable assets. Normal pushes to `master` do not publish a release. Pull requests run the Windows Lite build as CI validation. The workflow can also be started manually from **Actions → Release CI → Run workflow** on `master`.
+No manual tag creation or manual GitHub Release creation is required. Normal pushes to `master` do not publish a release. Pull requests run the x64 Lite build as CI validation. The workflow can also be started manually from **Actions → Release CI → Run workflow** on `master`.
 
 Do not reuse an existing release version; the workflow stops when the `v<version>` release already exists.
 
