@@ -1,109 +1,135 @@
 name: Release CI
+
 on:
   push:
-    tags: ['v*']
+    branches:
+      - master
+  pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: trafficmonitor-release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-
   x64_build:
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]')
     runs-on: windows-latest
-
     steps:
-    - uses: actions/checkout@v3
-      
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v2
-      
-    - name: Run msbuild
-      run: msbuild TrafficMonitor_Lite.sln -p:configuration="Release (lite)" -p:platform=x64 -p:platformToolset=v143
-      
-    - name: Get current time
-      uses: josStorer/get-current-time@v2.0.2
-      id: current-time
-      with:
-        format: YYYYMMDD_HHmmss
-        utcOffset: "+08:00"
-      
-    - name : Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: x64_${{ steps.current-time.outputs.formattedTime }}_TrafficMonitor
-        path: |
-          Bin/x64/Release (lite)/TrafficMonitor.exe
-          Bin/x64/Release (lite)/*.dll
-
-    - name : Upload pdb files
-      uses: actions/upload-artifact@v4
-      with:
-        name: x64_${{ steps.current-time.outputs.formattedTime }}_pdb
-        path: Bin/x64/Release (lite)/*.pdb
+      - uses: actions/checkout@v7
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v3
+      - name: Build Lite x64
+        run: msbuild TrafficMonitor_Lite.sln -p:configuration="Release (lite)" -p:platform=x64 -p:platformToolset=v143
+      - name: Package x64 Lite
+        shell: pwsh
+        run: |
+          $source = "Bin/x64/Release (lite)"
+          New-Item -ItemType Directory -Force -Path package | Out-Null
+          Copy-Item "$source/TrafficMonitor.exe" package/
+          Get-ChildItem "$source/*.dll" -File -ErrorAction SilentlyContinue | Copy-Item -Destination package/
+          Compress-Archive -Path "package/*" -DestinationPath "TrafficMonitor_x64_Lite.zip" -Force
+      - uses: actions/upload-artifact@v7
+        with:
+          name: trafficmonitor-x64-lite
+          path: TrafficMonitor_x64_Lite.zip
 
   x86_build:
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]')
     runs-on: windows-latest
-
     steps:
-    - uses: actions/checkout@v3
-      
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v2
-      
-    - name: Run msbuild
-      run: msbuild TrafficMonitor_Lite.sln -p:configuration="Release (lite)" -p:platform=x86 -p:platformToolset=v143
-      
-    - name: Get current time
-      uses: josStorer/get-current-time@v2.0.2
-      id: current-time
-      with:
-        format: YYYYMMDD_HHmmss
-        utcOffset: "+08:00"
-      
-    - name : Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: x86_${{ steps.current-time.outputs.formattedTime }}_TrafficMonitor
-        path: |
-          Bin/Release (lite)/TrafficMonitor.exe
-          Bin/Release (lite)/*.dll
-      
-    - name : Upload pdb files
-      uses: actions/upload-artifact@v4
-      with:
-        name: x86_${{ steps.current-time.outputs.formattedTime }}_pdb
-        path: Bin/Release (lite)/*.pdb
+      - uses: actions/checkout@v7
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v3
+      - name: Build Lite x86
+        run: msbuild TrafficMonitor_Lite.sln -p:configuration="Release (lite)" -p:platform=x86 -p:platformToolset=v143
+      - name: Package x86 Lite
+        shell: pwsh
+        run: |
+          $source = "Bin/Release (lite)"
+          New-Item -ItemType Directory -Force -Path package | Out-Null
+          Copy-Item "$source/TrafficMonitor.exe" package/
+          Get-ChildItem "$source/*.dll" -File -ErrorAction SilentlyContinue | Copy-Item -Destination package/
+          Compress-Archive -Path "package/*" -DestinationPath "TrafficMonitor_x86_Lite.zip" -Force
+      - uses: actions/upload-artifact@v7
+        with:
+          name: trafficmonitor-x86-lite
+          path: TrafficMonitor_x86_Lite.zip
 
   arm64ec_build:
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]')
     runs-on: windows-latest
-
     steps:
-    - uses: actions/checkout@v3
-      
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v2
-      
-    - name: Run msbuild
-      run: msbuild TrafficMonitor_Lite.sln -p:configuration="Release (lite)" -p:platform=ARM64EC -p:platformToolset=v143
-      
-    - name: Get current time
-      uses: josStorer/get-current-time@v2.0.2
-      id: current-time
-      with:
-        format: YYYYMMDD_HHmmss
-        utcOffset: "+08:00"
+      - uses: actions/checkout@v7
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v3
+      - name: Build Lite ARM64EC
+        run: msbuild TrafficMonitor_Lite.sln -p:configuration="Release (lite)" -p:platform=ARM64EC -p:platformToolset=v143
+      - name: Package ARM64EC Lite
+        shell: pwsh
+        run: |
+          $source = "Bin/ARM64EC/Release (lite)"
+          New-Item -ItemType Directory -Force -Path package | Out-Null
+          Copy-Item "$source/TrafficMonitor.exe" package/
+          Get-ChildItem "$source/*.dll" -File -ErrorAction SilentlyContinue | Copy-Item -Destination package/
+          Compress-Archive -Path "package/*" -DestinationPath "TrafficMonitor_ARM64EC_Lite.zip" -Force
+      - uses: actions/upload-artifact@v7
+        with:
+          name: trafficmonitor-arm64ec-lite
+          path: TrafficMonitor_ARM64EC_Lite.zip
 
-    # - name: Move dll file path 
-    #   run: mv Bin/x64/Release/*.dll  Bin/ARM64EC/Release/
-
-    - name : Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: arm64EC_${{ steps.current-time.outputs.formattedTime }}_TrafficMonitor
-        path: |
-          Bin/ARM64EC/Release (lite)/TrafficMonitor.exe
-          Bin/ARM64EC/Release (lite)/*.dll
-
-    - name : Upload pdb files
-      uses: actions/upload-artifact@v4
-      with:
-        name: arm64EC_${{ steps.current-time.outputs.formattedTime }}_pdb
-        path: Bin/ARM64EC/Release (lite)/*.pdb
+  release:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/master' && contains(github.event.head_commit.message, '[release]'))
+    needs: [x64_build, x86_build, arm64ec_build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: Read release version
+        id: version
+        shell: bash
+        run: |
+          version=$(sed -n 's:.*<version>\([^<]*\)</version>.*:\1:p' version.info | head -n 1)
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Check release does not already exist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: v${{ steps.version.outputs.version }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists."
+            exit 1
+          fi
+      - name: Download x64 package
+        uses: actions/download-artifact@v8
+        with:
+          name: trafficmonitor-x64-lite
+          path: release-assets/x64
+      - name: Download x86 package
+        uses: actions/download-artifact@v8
+        with:
+          name: trafficmonitor-x86-lite
+          path: release-assets/x86
+      - name: Download ARM64EC package
+        uses: actions/download-artifact@v8
+        with:
+          name: trafficmonitor-arm64ec-lite
+          path: release-assets/arm64ec
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          TARGET: ${{ github.sha }}
+        run: |
+          gh release create "v$VERSION" \
+            "release-assets/x64/TrafficMonitor_x64_Lite.zip" \
+            "release-assets/x86/TrafficMonitor_x86_Lite.zip" \
+            "release-assets/arm64ec/TrafficMonitor_ARM64EC_Lite.zip" \
+            --target "$TARGET" \
+            --title "TrafficMonitor v$VERSION" \
+            --generate-notes

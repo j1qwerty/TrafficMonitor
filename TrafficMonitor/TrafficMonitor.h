@@ -24,6 +24,7 @@
 #include "PluginInterface.h"
 
 class CTrafficMonitorDlg;
+class CTrafficMonitorController;
 
 // CTrafficMonitorApp:
 // 有关此类的实现，请参阅 TrafficMonitor.cpp
@@ -189,7 +190,7 @@ private:
     bool m_is_windows11_taskbar{ false };  //是否为Windows11的任务栏
     COLORREF m_theme_color{};
 #ifdef TASKBAR_ONLY
-    CTrafficMonitorDlg* m_taskbar_only_controller{};
+    CTrafficMonitorController* m_taskbar_only_controller{};
 #endif
 
 // 重写

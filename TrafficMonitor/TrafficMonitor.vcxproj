@@ -810,7 +810,14 @@
     <ClInclude Include="ColorStatic.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="CommonData.h" />
-    <ClInclude Include="CSkinPreviewView.h" />
+    <ClInclude Include="CSkinPreviewView.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="DrawCommon.h" />
     <ClInclude Include="GeneralSettingsDlg.h" />
     <ClInclude Include="HistoryTrafficDlg.h" />
@@ -818,8 +825,22 @@
     <ClInclude Include="IniHelper.h" />
     <ClInclude Include="HistoryTrafficListCtrl.h" />
     <ClInclude Include="ListCtrlEx.h" />
-    <ClInclude Include="MainWndColorDlg.h" />
-    <ClInclude Include="MainWndSettingsDlg.h" />
+    <ClInclude Include="MainWndColorDlg.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="MainWndSettingsDlg.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="MessageDlg.h" />
     <ClInclude Include="NetworkInfoDlg.h" />
     <ClInclude Include="Nullable.hpp" />
@@ -840,10 +861,38 @@
     <ClInclude Include="SetItemOrderDlg.h" />
     <ClInclude Include="SettingsHelper.h" />
     <ClInclude Include="SimpleXML.h" />
-    <ClInclude Include="SkinAutoAdaptSettingDlg.h" />
-    <ClInclude Include="SkinDlg.h" />
-    <ClInclude Include="SkinFile.h" />
-    <ClInclude Include="SkinManager.h" />
+    <ClInclude Include="SkinAutoAdaptSettingDlg.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="SkinDlg.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="SkinFile.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="SkinManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="SpinEdit.h" />
     <ClInclude Include="StaticEx.h" />
     <ClInclude Include="stdafx.h" />
@@ -862,7 +911,15 @@
     <ClInclude Include="TinyXml2Helper.h" />
     <ClInclude Include="tinyxml2\tinyxml2.h" />
     <ClInclude Include="TrafficMonitor.h" />
-    <ClInclude Include="TrafficMonitorDlg.h" />
+    <ClInclude Include="TrafficMonitorController.h" />
+    <ClInclude Include="TrafficMonitorDlg.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="UpdateHelper.h" />
     <ClInclude Include="WIC.h" />
     <ClInclude Include="Win11TaskbarDlg.h" />
@@ -910,7 +967,14 @@
     <ClCompile Include="LinkStatic.cpp" />
     <ClCompile Include="ColorStatic.cpp" />
     <ClCompile Include="Common.cpp" />
-    <ClCompile Include="CSkinPreviewView.cpp" />
+    <ClCompile Include="CSkinPreviewView.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="DrawCommon.cpp" />
     <ClCompile Include="GeneralSettingsDlg.cpp" />
     <ClCompile Include="HistoryTrafficDlg.cpp" />
@@ -918,8 +982,22 @@
     <ClCompile Include="IniHelper.cpp" />
     <ClCompile Include="HistoryTrafficListCtrl.cpp" />
     <ClCompile Include="ListCtrlEx.cpp" />
-    <ClCompile Include="MainWndColorDlg.cpp" />
-    <ClCompile Include="MainWndSettingsDlg.cpp" />
+    <ClCompile Include="MainWndColorDlg.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="MainWndSettingsDlg.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="MessageDlg.cpp" />
     <ClCompile Include="NetworkInfoDlg.cpp" />
     <ClCompile Include="OptionsDlg.cpp" />
@@ -937,10 +1015,38 @@
     <ClCompile Include="SetItemOrderDlg.cpp" />
     <ClCompile Include="SettingsHelper.cpp" />
     <ClCompile Include="SimpleXML.cpp" />
-    <ClCompile Include="SkinAutoAdaptSettingDlg.cpp" />
-    <ClCompile Include="SkinDlg.cpp" />
-    <ClCompile Include="SkinFile.cpp" />
-    <ClCompile Include="SkinManager.cpp" />
+    <ClCompile Include="SkinAutoAdaptSettingDlg.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="SkinDlg.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="SkinFile.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="SkinManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="SpinEdit.cpp" />
     <ClCompile Include="StaticEx.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -984,7 +1090,15 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TrafficMonitor.cpp" />
-    <ClCompile Include="TrafficMonitorDlg.cpp" />
+    <ClCompile Include="TrafficMonitorController.cpp" />
+    <ClCompile Include="TrafficMonitorDlg.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug (lite)|ARM64EC'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release (lite)|ARM64EC'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="UpdateHelper.cpp" />
     <ClCompile Include="WIC.cpp" />
     <ClCompile Include="Win11TaskbarDlg.cpp" />

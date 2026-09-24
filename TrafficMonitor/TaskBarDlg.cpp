@@ -5,7 +5,11 @@
 #include "TrafficMonitor.h"
 #include "TaskBarDlg.h"
 #include "afxdialogex.h"
+#ifdef TASKBAR_ONLY
+#include "TrafficMonitorController.h"
+#else
 #include "TrafficMonitorDlg.h"
+#endif
 #include "WindowsSettingHelper.h"
 #include "WIC.h"
 #include "Nullable.hpp"
