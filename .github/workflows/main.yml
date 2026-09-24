@@ -25,8 +25,8 @@ jobs:
       - name: Ensure MFC is installed
         shell: pwsh
         run: |
-          $installer = "$env:ProgramFiles(x86)\Microsoft Visual Studio\Installer\vs_installer.exe"
-          $vswhere = "$env:ProgramFiles(x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+          $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 
           if (-not (Test-Path $installer)) {
             throw "Visual Studio Installer not found: $installer"
