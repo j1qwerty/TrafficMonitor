@@ -1137,6 +1137,9 @@ void CTaskBarDlg::OnInitMenu(CMenu* pMenu)
     pMenu->EnableMenuItem(ID_SELECT_ALL_CONNECTION, MF_BYCOMMAND | (theApp.m_general_data.show_all_interface ? MF_GRAYED : MF_ENABLED));
     pMenu->EnableMenuItem(ID_CHECK_UPDATE, MF_BYCOMMAND | (theApp.IsCheckingForUpdate() ? MF_GRAYED : MF_ENABLED));
 
+    bool auto_run_enabled = theApp.GetAutoRun(nullptr, false) || theApp.GetAutoRun(nullptr, true);
+    pMenu->CheckMenuItem(ID_AUTO_RUN_WHEN_START, MF_BYCOMMAND | (auto_run_enabled ? MF_CHECKED : MF_UNCHECKED));
+
     //pMenu->SetDefaultItem(ID_NETWORK_INFO);
     //设置默认菜单项
     switch (theApp.m_taskbar_data.double_click_action)
