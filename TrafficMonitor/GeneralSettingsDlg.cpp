@@ -3,7 +3,11 @@
 
 #include "stdafx.h"
 #include "TrafficMonitor.h"
+#ifdef TASKBAR_ONLY
+#include "TrafficMonitorController.h"
+#else
 #include "TrafficMonitorDlg.h"
+#endif
 #include "GeneralSettingsDlg.h"
 #include "PluginManagerDlg.h"
 #include "SelectConnectionsDlg.h"
@@ -388,9 +392,20 @@ BOOL CGeneralSettingsDlg::OnInitDialog()
     m_monitor_time_span_ori = m_data.monitor_time_span;
     m_update_source_ori = m_data.update_source;
 
-    if (CTrafficMonitorDlg::Instance()->IsGetDiskUsageByPdh())
+    if (
+#ifdef TASKBAR_ONLY
+        CTrafficMonitorController::Instance()->IsGetDiskUsageByPdh()
+#else
+        CTrafficMonitorDlg::Instance()->IsGetDiskUsageByPdh()
+#endif
+    )
     {
-        const auto& disk_names = CTrafficMonitorDlg::Instance()->GetPdhDiskUsageHelper().GetDiskNames();
+        const auto& disk_names =
+#ifdef TASKBAR_ONLY
+            CTrafficMonitorController::Instance()->GetPdhDiskUsageHelper().GetDiskNames();
+#else
+            CTrafficMonitorDlg::Instance()->GetPdhDiskUsageHelper().GetDiskNames();
+#endif
         for (const auto& hdd_name : disk_names)
             m_hard_disk_combo.AddString(hdd_name);
         int cur_index = m_hard_disk_combo.FindString(-1, m_data.hard_disk_name.c_str());
@@ -407,7 +422,13 @@ BOOL CGeneralSettingsDlg::OnInitDialog()
     {
         CSingleLock sync(&theApp.m_minitor_lib_critical, TRUE);
         //初始化选择硬盘下拉列表
-        if (!CTrafficMonitorDlg::Instance()->IsGetDiskUsageByPdh())
+        if (!
+#ifdef TASKBAR_ONLY
+            CTrafficMonitorController::Instance()->IsGetDiskUsageByPdh()
+#else
+            CTrafficMonitorDlg::Instance()->IsGetDiskUsageByPdh()
+#endif
+        )
         {
             for (const auto& hdd_item : theApp.m_pMonitor->AllHDDTemperature())
                 m_hard_disk_combo.AddString(hdd_item.first.c_str());

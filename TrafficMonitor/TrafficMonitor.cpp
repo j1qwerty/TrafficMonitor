@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "TrafficMonitor.h"
+#include "TaskBarDlg.h"
 #ifdef TASKBAR_ONLY
 #include "TrafficMonitorController.h"
 #else

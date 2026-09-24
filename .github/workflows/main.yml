@@ -4,66 +4,93 @@ on:
   push:
     branches:
       - master
-  pull_request:
-  workflow_dispatch:
+  pull_request: {}
+  workflow_dispatch: {}
 
 permissions:
   contents: write
 
-concurrency:
-  group: trafficmonitor-release-${{ github.ref }}
-  cancel-in-progress: false
-
-env:
-  CONFIGURATION: Release (lite)
-
 jobs:
-  x64_build:
-    name: Build and package Lite x64
-    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/master' && contains(github.event.head_commit.message, '[release]'))
+  build_x64:
+    name: Build Lite x64
     runs-on: windows-2022
+
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout
+        uses: actions/checkout@v7
 
       - name: Set up MSBuild
         uses: microsoft/setup-msbuild@v3
 
-      - name: Ensure VS 2022 MFC is installed
+      - name: Ensure MFC is installed
         shell: pwsh
         run: |
-          $installer = "$env:ProgramFiles(x86)\Microsoft Visual Studio\Installer\vs_installer.exe"
-          if (-not (Test-Path $installer)) { throw "Visual Studio Installer was not found at $installer" }
-          $vswhere = "$env:ProgramFiles(x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+          $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+
+          if (-not (Test-Path $installer)) {
+            throw "Visual Studio Installer not found: $installer"
+          }
+
           $installPath = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
-          if (-not $installPath) { throw "Visual Studio installation was not found." }
-          Write-Host "Visual Studio: $installPath"
+          if (-not $installPath) {
+            throw "Visual Studio installation not found."
+          }
+
+          Write-Host "Using Visual Studio at $installPath"
+
           & $installer modify --installPath "$installPath" --add Microsoft.VisualStudio.Component.VC.MFC --quiet --norestart --wait
-          if ($LASTEXITCODE -ne 0) { throw "Visual Studio Installer failed with exit code $LASTEXITCODE" }
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "Visual Studio MFC installation failed with exit code $LASTEXITCODE"
+          }
+
           $mfcHeader = Get-ChildItem "$installPath\VC\Tools\MSVC\*\atlmfc\include\afxwin.h" -File -ErrorAction SilentlyContinue | Select-Object -First 1
-          if (-not $mfcHeader) { throw "MFC headers were not found after installation." }
-          Write-Host "MFC found at: $($mfcHeader.FullName)"
+          if (-not $mfcHeader) {
+            throw "MFC headers were not found after installation."
+          }
+
+          Write-Host "MFC header: $($mfcHeader.FullName)"
 
       - name: Build Lite x64
         shell: pwsh
         run: |
           $solutionDir = "$env:GITHUB_WORKSPACE\"
-          msbuild "$env:GITHUB_WORKSPACE\TrafficMonitor\TrafficMonitor.vcxproj" -p:Configuration="$env:CONFIGURATION" -p:Platform=x64 -p:PlatformToolset=v143 -p:SolutionDir="$solutionDir" -m
-          if ($LASTEXITCODE -ne 0) { throw "Lite x64 build failed with exit code $LASTEXITCODE" }
+          $project = "$env:GITHUB_WORKSPACE\TrafficMonitor\TrafficMonitor.vcxproj"
 
-      - name: Verify and package x64 Lite
+          msbuild $project /m /p:Configuration="Release (lite)" /p:Platform=x64 /p:PlatformToolset=v143 /p:SolutionDir="$solutionDir"
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "MSBuild failed with exit code $LASTEXITCODE"
+          }
+
+      - name: Verify executable
         shell: pwsh
         run: |
-          $source = Join-Path $env:GITHUB_WORKSPACE "Bin\x64\Release (lite)"
-          $exe = Join-Path $source "TrafficMonitor.exe"
-          if (-not (Test-Path $exe)) { throw "Lite x64 executable was not found at $exe" }
-          Write-Host "Built executable: $exe"
-          Get-Item $exe | Format-List FullName,Length,LastWriteTime
-          New-Item -ItemType Directory -Force -Path package | Out-Null
-          Copy-Item "$source\*" package\ -Recurse -Force
-          Compress-Archive -Path "package\*" -DestinationPath "TrafficMonitor_x64_Lite.zip" -Force
-          Copy-Item $exe "TrafficMonitor_x64_Lite.exe" -Force
+          $output = "$env:GITHUB_WORKSPACE\Bin\x64\Release (lite)\TrafficMonitor.exe"
 
-      - name: Upload x64 build assets
+          if (-not (Test-Path $output)) {
+            throw "Expected executable was not produced: $output"
+          }
+
+          $file = Get-Item $output
+          Write-Host "Built: $($file.FullName)"
+          Write-Host "Size: $($file.Length) bytes"
+
+      - name: Package x64 Lite
+        shell: pwsh
+        run: |
+          $source = "$env:GITHUB_WORKSPACE\Bin\x64\Release (lite)"
+          $package = "$env:GITHUB_WORKSPACE\package"
+          $zip = "$env:GITHUB_WORKSPACE\TrafficMonitor_x64_Lite.zip"
+          $exe = "$env:GITHUB_WORKSPACE\TrafficMonitor_x64_Lite.exe"
+
+          New-Item -ItemType Directory -Force -Path $package | Out-Null
+          Copy-Item "$source\*" "$package\" -Recurse -Force
+          Compress-Archive -Path "$package\*" -DestinationPath $zip -Force
+          Copy-Item "$source\TrafficMonitor.exe" $exe -Force
+
+      - name: Upload x64 release assets
         uses: actions/upload-artifact@v7
         with:
           name: trafficmonitor-x64-lite
@@ -73,95 +100,65 @@ jobs:
           if-no-files-found: error
 
   release:
-    name: Create tag and GitHub Release
-    if: (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master') || (github.event_name == 'push' && github.ref == 'refs/heads/master' && contains(github.event.head_commit.message, '[release]'))
-    needs: x64_build
+    name: Create v<version> release
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/master' && contains(github.event.head_commit.message, '[release]'))
+    needs: build_x64
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: Read and validate release version
+      - name: Read version
         id: version
-        shell: python
+        shell: bash
         run: |
-          import os, re
-          from pathlib import Path
-          raw = Path("version.info").read_text(encoding="utf-8")
-          match = re.search(r"<version>\s*([^<]+?)\s*</version>", raw)
-          if not match:
-              raise SystemExit("version.info does not contain a valid <version>...</version> value.")
-          version = match.group(1).strip()
-          if not re.fullmatch(r"[0-9]+(?:\.[0-9]+)*(?:-[0-9A-Za-z.-]+)?", version):
-              raise SystemExit(f"Invalid release version: {version}")
-          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
-              fh.write(f"version={version}\n")
-              fh.write(f"tag=v{version}\n")
-          print(f"Release version: {version}")
-          print(f"Release tag: v{version}")
+          version="$(grep -oPm1 '(?<=<version>)[^<]+' version.info | tr -d '[:space:]')"
 
-      - name: Check for an existing release
+          if [ -z "$version" ]; then
+            echo "Could not read <version>...</version> from version.info"
+            exit 1
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Check release does not already exist
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
         shell: bash
         run: |
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "GitHub Release $TAG already exists. Refusing to overwrite it."
+            echo "Release $TAG already exists."
             exit 1
           fi
 
-      - name: Create release tag
+      - name: Create annotated tag
         env:
           TAG: ${{ steps.version.outputs.tag }}
-          TARGET_SHA: ${{ github.sha }}
         shell: bash
         run: |
           git fetch --tags origin
+
           if git ls-remote --exit-code --refs origin "refs/tags/$TAG" >/dev/null 2>&1; then
             git fetch origin "refs/tags/$TAG:refs/tags/$TAG"
-            tag_target="$(git rev-list -n 1 "$TAG")"
-            if [[ "$tag_target" != "$TARGET_SHA" ]]; then
-              echo "Tag $TAG already exists but points to $tag_target, expected $TARGET_SHA."
+            target="$(git rev-list -n 1 "$TAG")"
+
+            if [ "$target" != "$GITHUB_SHA" ]; then
+              echo "Tag $TAG exists but points to $target instead of $GITHUB_SHA"
               exit 1
             fi
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git tag -a "$TAG" "$TARGET_SHA" -m "TrafficMonitor $TAG"
+            git tag -a "$TAG" "$GITHUB_SHA" -m "TrafficMonitor $TAG"
             git push origin "$TAG"
           fi
 
-      - name: Create release notes
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-        shell: python
-        run: |
-          from pathlib import Path
-          notes = f"""# TrafficMonitor v{VERSION}
-
-## What's included
-
-- Taskbar-only Lite build for Windows x64.
-- Floating-window UI is excluded from the Lite executable path.
-- English is the default language in this fork.
-- The Lite monitor/taskbar controller is separated from the floating-window implementation.
-- Reduced idle overhead in the taskbar-only monitoring path.
-
-## Download
-
-**TrafficMonitor_x64_Lite.zip** contains the complete Lite build output.
-
-**TrafficMonitor_x64_Lite.exe** is the built executable by itself.
-
-The package requires the Microsoft Visual C++ runtime.
-"""
-          Path("release-notes.md").write_text(notes, encoding="utf-8")
-
-      - name: Download x64 build assets
+      - name: Download x64 assets
         uses: actions/download-artifact@v8
         with:
           name: trafficmonitor-x64-lite
@@ -179,5 +176,5 @@ The package requires the Microsoft Visual C++ runtime.
             "release-assets/TrafficMonitor_x64_Lite.exe" \
             --verify-tag \
             --title "TrafficMonitor v$VERSION" \
-            --notes-file release-notes.md \
+            --notes "Lite x64 release for TrafficMonitor. Includes the taskbar-only build, the complete ZIP package, and the built executable." \
             --generate-notes

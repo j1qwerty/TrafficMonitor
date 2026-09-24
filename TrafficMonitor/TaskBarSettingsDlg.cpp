@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "TrafficMonitor.h"
 #include "TaskBarSettingsDlg.h"
+#include "TaskBarDlg.h"
 #include "afxdialogex.h"
 #include "CMFCColorDialogEx.h"
 #include "CAutoAdaptSettingsDlg.h"
