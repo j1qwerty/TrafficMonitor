@@ -125,11 +125,13 @@ A release is triggered by a push to `master` whose commit message contains `[rel
 # 1. Update the version in version.info
 # 2. Commit with the release flag
 git add version.info
-git commit -m "Release 1.87 [release]"
+git commit -m "Release 2 [release]"
 git push origin master
 ```
 
-The workflow reads the version from <version>...</version>, creates the matching `v<version>` Git tag/release, and attaches the three Lite ZIP packages. Normal pushes to `master` do not publish a release. Pull requests run the Windows Lite build as CI validation. The workflow can also be started manually from **Actions → Release CI → Run workflow**.
+The workflow validates the version, builds the x86, x64, and ARM64EC Lite packages, creates an **annotated `v<version>` Git tag**, and publishes the GitHub Release automatically. Release notes are generated from `version.info` release highlights and GitHub's automatic release-notes generator, and all three Lite ZIP packages are attached.
+
+No manual tag creation or manual GitHub Release creation is required. Normal pushes to `master` do not publish a release. Pull requests run the Windows Lite build as CI validation. The workflow can also be started manually from **Actions → Release CI → Run workflow** on `master`.
 
 Do not reuse an existing release version; the workflow stops when the `v<version>` release already exists.
 
