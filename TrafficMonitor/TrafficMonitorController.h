@@ -25,6 +25,8 @@ public:
 
     bool IsTaskbarWndValid() const;
     bool IsTemperatureNeeded() const;
+    CPdhDiskUsage& GetPdhDiskUsageHelper() { return m_disk_usage_helper; }
+    bool IsGetDiskUsageByPdh() const { return m_get_disk_usage_by_pdh; }
 
     void ExitMonitorThread();
     void ShowNotifyTip(const wchar_t* title, const wchar_t* message);
