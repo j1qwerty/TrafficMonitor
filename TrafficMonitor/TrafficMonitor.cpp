@@ -4,20 +4,30 @@
 
 #include "stdafx.h"
 #include "TrafficMonitor.h"
+#ifdef TASKBAR_ONLY
+#include "TrafficMonitorController.h"
+#else
 #include "TrafficMonitorDlg.h"
+#endif
 #include "crashtool.h"
 #include "UpdateHelper.h"
 #include "Test.h"
+#ifndef TASKBAR_ONLY
 #include "WIC.h"
+#endif
 #include "auto_start_helper.h"
 #include "AppAlreadyRuningDlg.h"
 #include "WindowsSettingHelper.h"
+#ifndef TASKBAR_ONLY
 #include "SkinManager.h"
+#endif
 #include "SettingsHelper.h"
 #ifndef DISABLE_WINDOWS_WEB_EXPERIENCE_DETECTOR
 #include "winrt/base.h"
 #endif
+#ifndef TASKBAR_ONLY
 #include <gdiplus.h>
+#endif
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -117,7 +127,9 @@ void CTrafficMonitorApp::LoadConfig()
     m_cfg_data.m_skin_name = ini.GetString(_T("config"), _T("skin_selected"), _T(""));
     if (m_cfg_data.m_skin_name.substr(0, 8) == L".\\skins\\")       //如果读取到的皮肤名称前面有".\\skins\\"，则把它删除。（用于和前一个版本保持兼容性）
         m_cfg_data.m_skin_name = m_cfg_data.m_skin_name.substr(7);
+#ifndef TASKBAR_ONLY
     CSkinManager::SkinNameNormalize(m_cfg_data.m_skin_name);
+#endif
 
     m_cfg_data.skin_auto_adapt = ini.GetBool(L"skins", L"skin_auto_adapt", false);
     m_cfg_data.skin_name_dark_mode = ini.GetString(L"skins", L"skin_name_dark_mode", L"");
@@ -1112,9 +1124,9 @@ BOOL CTrafficMonitorApp::InitInstance()
     SendSettingsToPlugin();
 
 #ifdef TASKBAR_ONLY
-    m_taskbar_only_controller = new CTrafficMonitorDlg();
+    m_taskbar_only_controller = new CTrafficMonitorController(IDD_TASKBAR_MONITOR_CONTROLLER_DIALOG);
     m_pMainWnd = m_taskbar_only_controller;
-    if (!m_taskbar_only_controller->Create(IDD_TRAFFICMONITOR_DIALOG, nullptr))
+    if (!m_taskbar_only_controller->Create(IDD_TASKBAR_MONITOR_CONTROLLER_DIALOG, nullptr))
     {
         delete m_taskbar_only_controller;
         m_taskbar_only_controller = nullptr;
@@ -1480,7 +1492,7 @@ const wchar_t* CTrafficMonitorApp::GetMonitorValueString(MonitorItem item, int i
 
 void CTrafficMonitorApp::ShowNotifyMessage(const wchar_t* strMsg)
 {
-    CTrafficMonitorDlg* pMainWnd = dynamic_cast<CTrafficMonitorDlg*>(m_pMainWnd);
+    CTrafficMonitorController* pMainWnd = dynamic_cast<CTrafficMonitorController*>(m_pMainWnd);
     if (pMainWnd != nullptr)
     {
         pMainWnd->ShowNotifyTip(CCommon::LoadText(IDS_TRAFFICMONITOR_PLUGIN_NITIFICATION), strMsg);
@@ -1502,7 +1514,7 @@ const wchar_t* CTrafficMonitorApp::GetPluginConfigDir() const
 
 int CTrafficMonitorApp::GetDPI(DPIType type) const
 {
-    CTrafficMonitorDlg* pMainWnd = CTrafficMonitorDlg::Instance();
+    CTrafficMonitorController* pMainWnd = CTrafficMonitorController::Instance();
     switch (type)
     {
     case DPI_MAIN_WND:
@@ -1525,7 +1537,7 @@ void* CTrafficMonitorApp::GetMainWindowHwnd()
 
 void* CTrafficMonitorApp::GetTaskbarWindowHwnd()
 {
-    return CTrafficMonitorDlg::Instance()->GetTaskbarWindow()->GetSafeHwnd();
+    return CTrafficMonitorController::Instance()->GetTaskbarWindow()->GetSafeHwnd();
 }
 
 const wchar_t* CTrafficMonitorApp::GetStringRes(const wchar_t* key, const wchar_t* section)

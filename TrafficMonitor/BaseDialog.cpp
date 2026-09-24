@@ -6,7 +6,11 @@
 #include "afxdialogex.h"
 #include "IniHelper.h"
 #include "TrafficMonitor.h"
+#ifdef TASKBAR_ONLY
+#include "TrafficMonitorController.h"
+#else
 #include "TrafficMonitorDlg.h"
+#endif
 
 // CBaseDialog 对话框
 std::map<CString, HWND> CBaseDialog::m_unique_hwnd;
@@ -395,7 +399,11 @@ void CBaseDialog::OnDestroy()
     SaveConfig();
 
     //当所有对话框关闭时重新设置主窗口置顶
+#ifdef TASKBAR_ONLY
+    CTrafficMonitorController* pDlg = dynamic_cast<CTrafficMonitorController*>(theApp.m_pMainWnd);
+#else
     CTrafficMonitorDlg* pDlg = dynamic_cast<CTrafficMonitorDlg*>(theApp.m_pMainWnd);
+#endif
     if (pDlg != nullptr && IsAllDialogClosed())
         pDlg->SetAlwaysOnTop();
 }
