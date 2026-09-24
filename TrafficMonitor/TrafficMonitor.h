@@ -188,6 +188,9 @@ private:
 
     bool m_is_windows11_taskbar{ false };  //是否为Windows11的任务栏
     COLORREF m_theme_color{};
+#ifdef TASKBAR_ONLY
+    CTrafficMonitorDlg* m_taskbar_only_controller{};
+#endif
 
 // 重写
 public:
