@@ -2493,6 +2493,9 @@ void CTrafficMonitorDlg::OnMousePenetrate()
 
 void CTrafficMonitorDlg::OnShowTaskBarWnd()
 {
+#ifdef TASKBAR_ONLY
+    return;
+#else
     // TODO: 在此添加命令处理程序代码
     if (m_tBarDlg != nullptr)
     {
@@ -2514,6 +2517,7 @@ void CTrafficMonitorDlg::OnShowTaskBarWnd()
         }
     }
     theApp.SaveConfig();
+#endif
 }
 
 
@@ -2550,6 +2554,9 @@ LRESULT CTrafficMonitorDlg::OnTaskBarCreated(WPARAM wParam, LPARAM lParam)
 
 void CTrafficMonitorDlg::OnShowMainWnd()
 {
+#ifdef TASKBAR_ONLY
+    return;
+#else
     // TODO: 在此添加命令处理程序代码
     if (!theApp.m_cfg_data.m_hide_main_window)
     {
@@ -2568,6 +2575,7 @@ void CTrafficMonitorDlg::OnShowMainWnd()
         theApp.m_cfg_data.m_hide_main_window = false;
     }
     theApp.SaveConfig();
+#endif
 }
 
 
@@ -2810,6 +2818,10 @@ afx_msg LRESULT CTrafficMonitorDlg::OnDpichanged(WPARAM wParam, LPARAM lParam)
 
 afx_msg LRESULT CTrafficMonitorDlg::OnTaskbarWndClosed(WPARAM wParam, LPARAM lParam)
 {
+#ifdef TASKBAR_ONLY
+    theApp.m_cfg_data.m_show_task_bar_wnd = true;
+    PostMessage(WM_REOPEN_TASKBAR_WND, 0, 0);
+#else
     theApp.m_cfg_data.m_show_task_bar_wnd = false;
     //关闭任务栏窗口后，如果没有显示通知区图标，且没有显示主窗口或设置了鼠标穿透，则将通知区图标显示出来
     if (!theApp.m_general_data.show_notify_icon && theApp.IsForceShowNotifyIcon())
