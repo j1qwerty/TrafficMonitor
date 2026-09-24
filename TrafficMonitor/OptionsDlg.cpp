@@ -49,13 +49,16 @@ BOOL COptionsDlg::OnInitDialog()
     // TODO:  在此添加额外的初始化
     SetIcon(theApp.GetMenuIcon(IDI_SETTINGS), FALSE);       // 设置小图标
 
-    //创建子对话框
+#ifndef TASKBAR_ONLY
     m_tab1_dlg.Create(IDD_MAIN_WND_SETTINGS_DIALOG, &m_tab);
+#endif
     m_tab2_dlg.Create(IDD_TASKBAR_SETTINGS_DIALOG, &m_tab);
     m_tab3_dlg.Create(IDD_GENERAL_SETTINGS_DIALOG, &m_tab);
 
     //保存子对话框
+#ifndef TASKBAR_ONLY
     m_tab_vect.push_back(&m_tab1_dlg);
+#endif
     m_tab_vect.push_back(&m_tab2_dlg);
     m_tab_vect.push_back(&m_tab3_dlg);
 
@@ -67,15 +70,18 @@ BOOL COptionsDlg::OnInitDialog()
         m_tab_height.push_back(rect.Height());
     }
 
-    //添加对话框
+#ifndef TASKBAR_ONLY
     m_tab.AddWindow(&m_tab1_dlg, CCommon::LoadText(IDS_MAIN_WINDOW_SETTINGS));
+#endif
     m_tab.AddWindow(&m_tab2_dlg, CCommon::LoadText(IDS_TASKBAR_WINDOW_SETTINGS));
     m_tab.AddWindow(&m_tab3_dlg, CCommon::LoadText(IDS_GENERAL_SETTINGS));
 
     //为每个标签添加图标
     CImageList ImageList;
     ImageList.Create(theApp.DPI(16), theApp.DPI(16), ILC_COLOR32 | ILC_MASK, 2, 2);
+#ifndef TASKBAR_ONLY
     ImageList.Add(theApp.GetMenuIcon(IDI_MAIN_WINDOW));
+#endif
     ImageList.Add(theApp.GetMenuIcon(IDI_TASKBAR_WINDOW));
     ImageList.Add(theApp.GetMenuIcon(IDI_SETTINGS));
     m_tab.SetImageList(&ImageList);
@@ -103,7 +109,9 @@ BOOL COptionsDlg::OnInitDialog()
 void COptionsDlg::OnOK()
 {
     // TODO: 在此添加专用代码和/或调用基类
+#ifndef TASKBAR_ONLY
     m_tab1_dlg.OnOK();
+#endif
     m_tab2_dlg.OnOK();
     m_tab3_dlg.OnOK();
 
