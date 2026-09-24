@@ -1,4 +1,5 @@
 #pragma once
+#pragma comment (lib, "iphlpapi.lib")
 #include "afxwin.h"
 #include "Common.h"
 #include "AdapterCommon.h"
@@ -86,7 +87,7 @@ protected:
 
     afx_msg void OnTimer(UINT_PTR nIDEvent);
     afx_msg void OnNetworkInfo();
-    afx_msg void OnTaskBarCreated(WPARAM wParam, LPARAM lParam);
+    afx_msg LRESULT OnTaskBarCreated(WPARAM wParam, LPARAM lParam);
     afx_msg void OnShowNotifyIcon();
     afx_msg void OnShowCpuMemory2();
     afx_msg void OnAppAbout();
