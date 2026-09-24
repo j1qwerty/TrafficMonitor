@@ -1275,6 +1275,11 @@ BOOL CTaskBarDlg::OnCommand(WPARAM wParam, LPARAM lParam)
     // TODO: 在此添加专用代码和/或调用基类
     UINT uMsg = LOWORD(wParam);
 #ifdef TASKBAR_ONLY
+    if (uMsg == ID_AUTO_RUN_WHEN_START)
+    {
+        ::SendMessage(theApp.m_pMainWnd->GetSafeHwnd(), WM_COMMAND, wParam, lParam);
+        return TRUE;
+    }
     if (uMsg == ID_APP_EXIT)
     {
         ::PostQuitMessage(0);
