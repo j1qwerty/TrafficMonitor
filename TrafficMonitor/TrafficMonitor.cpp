@@ -109,6 +109,10 @@ void CTrafficMonitorApp::LoadConfig()
     m_cfg_data.m_auto_select = ini.GetBool(_T("connection"), _T("auto_select"), true);
     m_cfg_data.m_select_all = ini.GetBool(_T("connection"), _T("select_all"), false);
     m_cfg_data.m_hide_main_window = ini.GetBool(_T("config"), _T("hide_main_window"), false);
+#ifdef TASKBAR_ONLY
+    m_cfg_data.m_hide_main_window = true;
+    m_cfg_data.m_show_task_bar_wnd = true;
+#endif
     m_cfg_data.m_connection_name = CCommon::UnicodeToStr(ini.GetString(L"connection", L"connection_name", L"").c_str());
     m_cfg_data.m_skin_name = ini.GetString(_T("config"), _T("skin_selected"), _T(""));
     if (m_cfg_data.m_skin_name.substr(0, 8) == L".\\skins\\")       //如果读取到的皮肤名称前面有".\\skins\\"，则把它删除。（用于和前一个版本保持兼容性）
@@ -1137,9 +1141,11 @@ BOOL CTrafficMonitorApp::InitInstance()
     ControlBarCleanUp();
 #endif
 
-    // 由于对话框已关闭，所以将返回 FALSE 以便退出应用程序，
-    //  而不是启动应用程序的消息泵。
+#ifdef TASKBAR_ONLY
+    return TRUE;
+#else
     return FALSE;
+#endif
 }
 
 void CTrafficMonitorApp::InitOpenHardwareLibInThread()
